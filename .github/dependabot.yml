@@ -1,0 +1,30 @@
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      spring:
+        patterns:
+          - "org.springframework*"
+          - "org.springframework.boot*"
+      test:
+        patterns:
+          - "org.junit*"
+          - "org.mockito*"
+          - "com.squareup.okhttp3*"
+      formatting:
+        patterns:
+          - "com.diffplug*"
+      eclipse-store:
+        patterns:
+          - "org.eclipse.store*"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"

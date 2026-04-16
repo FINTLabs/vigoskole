@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="no" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Fylke ' + ${countyNumber}">Fylke</title>
+    <link rel="stylesheet" th:href="@{/app.css}">
+</head>
+<body>
+<main class="page stack">
+    <div class="breadcrumbs">
+        <a th:href="@{/ui/school-years}">Skoleår</a>
+        <span>/</span>
+        <a th:href="@{/ui/school-years/{schoolYear}(schoolYear=${schoolYear})}" th:text="${schoolYear}">2025-2026</a>
+        <span>/</span>
+        <span th:text="${countyNumber}">03</span>
+    </div>
+
+    <section class="topbar">
+        <div>
+            <h1 class="title" th:text="'Fylke ' + ${countyNumber}">Fylke 03</h1>
+            <p class="subtitle">Ungdomsskoler og innsendingstatus.</p>
+        </div>
+        <span class="muted" th:text="${userDisplayName}">bruker</span>
+    </section>
+
+    <section class="card">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Skolenummer</th>
+                <th>Skole</th>
+                <th>Status</th>
+                <th>Innsendinger</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="school : ${schools}">
+                <td th:text="${school.schoolNumber()}">1234</td>
+                <td>
+                    <a th:href="@{/ui/school-years/{schoolYear}/counties/{countyNumber}/schools/{orgNumber}(schoolYear=${schoolYear},countyNumber=${countyNumber},orgNumber=${school.orgNumber()})}"
+                       th:text="${school.schoolName()}">Skole</a>
+                </td>
+                <td><span class="badge" th:classappend="${school.status()}" th:text="${school.status()}">ACCEPTED</span></td>
+                <td th:text="${school.submissions()}">1</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

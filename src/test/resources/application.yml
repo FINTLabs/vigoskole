@@ -1,0 +1,16 @@
+spring:
+  thymeleaf:
+    cache: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://example.invalid/jwks
+
+app:
+  storage-directory: build/test-eclipsestore
+  submission-window:
+    from: 2026-01-01
+    to: 2026-12-31
+  vigo-kodeverk:
+    base-url: http://localhost

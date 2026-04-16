@@ -1,6 +1,12 @@
 .gradle
 **/build/
 !**/src/**/build/
+.data/
+.idea/
+out/
+*.iml
+.DS_Store
+*.log
 
 # Ignore Gradle GUI config
 gradle-app.setting

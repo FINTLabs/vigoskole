@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: vigoskole
+  threads:
+    virtual:
+      enabled: true
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  thymeleaf:
+    cache: false
+  security:
+    oauth2:
+      client:
+        registration:
+          idporten:
+            client-id: ${IDPORTEN_CLIENT_ID:vigoskole}
+            client-secret: ${IDPORTEN_CLIENT_SECRET:change-me}
+            authorization-grant-type: authorization_code
+            scope:
+              - openid
+              - profile
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          idporten:
+            authorization-uri: ${IDPORTEN_AUTHORIZATION_URI:https://example.invalid/authorize}
+            token-uri: ${IDPORTEN_TOKEN_URI:https://example.invalid/token}
+            user-info-uri: ${IDPORTEN_USERINFO_URI:https://example.invalid/userinfo}
+            jwk-set-uri: ${IDPORTEN_JWK_SET_URI:https://example.invalid/jwks}
+            user-name-attribute: sub
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${MASKINPORTEN_JWK_SET_URI:https://example.invalid/jwks}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+app:
+  storage-directory: .data/eclipsestore
+  submission-window:
+    from: 2026-01-02
+    to: 2026-05-31
+  vigo-kodeverk:
+    base-url: https://kodeverk.vigo.no

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="no" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Vigo Skole - ' + ${schoolYear}">Vigo Skole</title>
+    <link rel="stylesheet" th:href="@{/app.css}">
+</head>
+<body>
+<main class="page stack">
+    <div class="breadcrumbs">
+        <a th:href="@{/ui/school-years}">Skoleår</a>
+        <span>/</span>
+        <span th:text="${schoolYear}">2025-2026</span>
+    </div>
+
+    <section class="topbar">
+        <div>
+            <h1 class="title" th:text="${schoolYear}">2025-2026</h1>
+            <p class="subtitle">Fylkeskommuner med innsendinger i valgt skoleår.</p>
+        </div>
+        <span class="muted" th:text="${userDisplayName}">bruker</span>
+    </section>
+
+    <section class="grid two">
+        <article class="card stack" th:each="county : ${counties}">
+            <div class="badge" th:text="${county.submissions()} + ' innsendinger'">1 innsending</div>
+            <h2 th:text="'Fylke ' + ${county.countyNumber()}">Fylke 03</h2>
+            <a th:href="@{/ui/school-years/{schoolYear}/counties/{countyNumber}(schoolYear=${schoolYear},countyNumber=${county.countyNumber()})}">
+                Åpne fylke
+            </a>
+        </article>
+    </section>
+</main>
+</body>
+</html>

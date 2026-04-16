@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="no" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Vigo Skole</title>
+    <link rel="stylesheet" th:href="@{/app.css}">
+</head>
+<body>
+<main class="page stack">
+    <section class="topbar">
+        <div>
+            <h1 class="title">Vigo Skole</h1>
+            <p class="subtitle">Inspeksjon av opplastninger og valideringsresultater for avgangselever.</p>
+        </div>
+        <div class="user-panel">
+            <span class="muted" th:text="${userDisplayName}">bruker</span>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit">Logg ut</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="card stack">
+        <h2>Innsendingsperiode</h2>
+        <form class="form-grid" th:action="@{/ui/submission-window}" method="post">
+            <label>Fra
+                <input type="date" name="from" th:value="${submissionWindow.from()}">
+            </label>
+            <label>Til
+                <input type="date" name="to" th:value="${submissionWindow.to()}">
+            </label>
+            <button type="submit">Oppdater periode</button>
+        </form>
+    </section>
+
+    <section class="grid two">
+        <article class="card stack" th:each="schoolYear : ${schoolYears}">
+            <div class="badge" th:text="${submissionCounts[schoolYear]} + ' innsendinger'">0 innsendinger</div>
+            <h2 th:text="${schoolYear}">2025-2026</h2>
+            <a th:href="@{/ui/school-years/{schoolYear}(schoolYear=${schoolYear})}">Åpne skoleår</a>
+        </article>
+        <article class="card" th:if="${#lists.isEmpty(schoolYears)}">
+            <h2>Ingen innsendinger ennå</h2>
+            <p class="muted">Når API-et mottar opplastninger, blir de tilgjengelige her.</p>
+        </article>
+    </section>
+</main>
+</body>
+</html>
