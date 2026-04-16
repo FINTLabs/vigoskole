@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import no.fintlabs.vigoskole.config.AppProperties;
 import no.fintlabs.vigoskole.domain.model.Submission;
 import no.fintlabs.vigoskole.domain.model.SubmissionWindow;
 import org.springframework.stereotype.Service;
@@ -13,16 +14,27 @@ public class InspectionService {
 
   private final SubmissionRepository submissionRepository;
   private final SubmissionWindowRepository submissionWindowRepository;
+  private final AppProperties appProperties;
 
   public InspectionService(
       SubmissionRepository submissionRepository,
-      SubmissionWindowRepository submissionWindowRepository) {
+      SubmissionWindowRepository submissionWindowRepository,
+      AppProperties appProperties) {
     this.submissionRepository = submissionRepository;
     this.submissionWindowRepository = submissionWindowRepository;
+    this.appProperties = appProperties;
   }
 
   public SubmissionWindow submissionWindow() {
-    return submissionWindowRepository.get();
+    SubmissionWindow current = submissionWindowRepository.get();
+    if (current != null && current.from() != null && current.to() != null) {
+      return current;
+    }
+    SubmissionWindow fallback =
+        new SubmissionWindow(
+            appProperties.submissionWindow().from(), appProperties.submissionWindow().to());
+    submissionWindowRepository.save(fallback);
+    return fallback;
   }
 
   public SubmissionWindow updateSubmissionWindow(SubmissionWindow submissionWindow) {

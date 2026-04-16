@@ -11,8 +11,8 @@ import no.fintlabs.vigoskole.domain.model.ValidationMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,12 +37,10 @@ public class SubmissionController {
       consumes = {MediaType.APPLICATION_JSON_VALUE, "application/ld+json"},
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<SubmissionResponse> submitGraduatingStudents(
-      @RequestBody GraduatingStudentsSubmissionRequest request,
-      JwtAuthenticationToken authentication) {
+      @RequestBody GraduatingStudentsSubmissionRequest request, @AuthenticationPrincipal Jwt jwt) {
     Submission submission =
         submissionService.submitGraduatingStudents(
-            request.toDomain(),
-            jwtSubmitterContextResolver.resolve((Jwt) authentication.getToken()));
+            request.toDomain(), jwtSubmitterContextResolver.resolve(jwt));
     return ResponseEntity.status(HttpStatus.CREATED).body(SubmissionResponse.from(submission));
   }
 

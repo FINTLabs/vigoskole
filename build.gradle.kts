@@ -47,6 +47,10 @@ tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
     jvmArgs(eclipseStoreJvmArgs)
 }
 
+tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootTestRun") {
+    jvmArgs(eclipseStoreJvmArgs)
+}
+
 spotless {
     java {
         googleJavaFormat("1.31.0")

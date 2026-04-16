@@ -4,9 +4,6 @@ spring:
   threads:
     virtual:
       enabled: true
-  jackson:
-    serialization:
-      write-dates-as-timestamps: false
   thymeleaf:
     cache: false
   security:
@@ -23,14 +20,14 @@ spring:
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
         provider:
           idporten:
-            authorization-uri: ${IDPORTEN_AUTHORIZATION_URI:https://example.invalid/authorize}
-            token-uri: ${IDPORTEN_TOKEN_URI:https://example.invalid/token}
-            user-info-uri: ${IDPORTEN_USERINFO_URI:https://example.invalid/userinfo}
-            jwk-set-uri: ${IDPORTEN_JWK_SET_URI:https://example.invalid/jwks}
+            authorization-uri: ${IDPORTEN_AUTHORIZATION_URI:https://login.idporten.no/authorize}
+            token-uri: ${IDPORTEN_TOKEN_URI:https://idporten.no/token}
+            user-info-uri: ${IDPORTEN_USERINFO_URI:https://idporten.no/userinfo}
+            jwk-set-uri: ${IDPORTEN_JWK_SET_URI:https://idporten.no/jwks.json}
             user-name-attribute: sub
       resourceserver:
         jwt:
-          jwk-set-uri: ${MASKINPORTEN_JWK_SET_URI:https://example.invalid/jwks}
+          jwk-set-uri: ${MASKINPORTEN_JWK_SET_URI:https://maskinporten.no/.well-known/oauth-authorization-server}
 
 management:
   endpoints:

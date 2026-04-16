@@ -13,7 +13,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import no.fintlabs.vigoskole.TestData;
 import no.fintlabs.vigoskole.application.SubmissionRepository;
+import no.fintlabs.vigoskole.application.SubmissionWindowRepository;
 import no.fintlabs.vigoskole.domain.model.Submission;
+import no.fintlabs.vigoskole.domain.model.SubmissionWindow;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,7 @@ class WebControllerTest {
   private MockMvc mockMvc;
 
   @Autowired private SubmissionRepository submissionRepository;
+  @Autowired private SubmissionWindowRepository submissionWindowRepository;
 
   @DynamicPropertySource
   static void registerProperties(DynamicPropertyRegistry registry) {
@@ -48,6 +51,9 @@ class WebControllerTest {
                 org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers
                     .springSecurity())
             .build();
+    submissionWindowRepository.save(
+        new SubmissionWindow(
+            java.time.LocalDate.of(2026, 1, 1), java.time.LocalDate.of(2026, 12, 31)));
     submissionRepository.save(TestData.submission(Submission.Status.ACCEPTED_WITH_WARNINGS));
   }
 
@@ -72,6 +78,55 @@ class WebControllerTest {
                 .param("to", "2026-06-01"))
         .andExpect(status().is3xxRedirection())
         .andExpect(redirectedUrl("/ui/school-years"));
+  }
+
+  @Test
+  void shouldShowConfiguredSubmissionWindowOnOverview() throws Exception {
+    mockMvc
+        .perform(get("/ui/school-years").with(user("fylkesbruker")))
+        .andExpect(status().isOk())
+        .andExpect(
+            content().string(org.hamcrest.Matchers.containsString("Nåværende konfigurert periode")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("2026-01-01")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("2026-12-31")));
+  }
+
+  @Test
+  void shouldShowErrorPageWhenOneDateIsMissing() throws Exception {
+    mockMvc
+        .perform(
+            post("/ui/submission-window").with(user("fylkesbruker")).with(csrf()).param("from", ""))
+        .andExpect(status().isOk())
+        .andExpect(
+            content().string(org.hamcrest.Matchers.containsString("Feil i innsendingsperiode")))
+        .andExpect(
+            content()
+                .string(
+                    org.hamcrest.Matchers.containsString("startdato og sluttdato må være satt")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("2026-01-01")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("2026-12-31")));
+  }
+
+  @Test
+  void shouldShowErrorPageWhenFromDateIsAfterToDate() throws Exception {
+    mockMvc
+        .perform(
+            post("/ui/submission-window")
+                .with(user("fylkesbruker"))
+                .with(csrf())
+                .param("from", "2026-07-01")
+                .param("to", "2026-06-01"))
+        .andExpect(status().isOk())
+        .andExpect(
+            content().string(org.hamcrest.Matchers.containsString("Feil i innsendingsperiode")))
+        .andExpect(
+            content()
+                .string(org.hamcrest.Matchers.containsString("fra-dato er satt etter til-dato")))
+        .andExpect(
+            content()
+                .string(
+                    org.hamcrest.Matchers.containsString(
+                        "fra-dato er lik eller tidligere enn til-dato")));
   }
 
   private static String newStorageDirectory() {

@@ -1,0 +1,13 @@
+spring:
+  security:
+    oauth2:
+      client:
+        provider:
+          idporten:
+            authorization-uri: ${IDPORTEN_AUTHORIZATION_URI:https://login.test.idporten.no/authorize}
+            token-uri: ${IDPORTEN_TOKEN_URI:https://test.idporten.no/token}
+            user-info-uri: ${IDPORTEN_USERINFO_URI:https://test.idporten.no/userinfo}
+            jwk-set-uri: ${IDPORTEN_JWK_SET_URI:https://test.idporten.no/jwks.json}
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${MASKINPORTEN_JWK_SET_URI:https://test.maskinporten.no/jwk}

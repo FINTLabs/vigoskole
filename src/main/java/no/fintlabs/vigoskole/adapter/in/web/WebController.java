@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,19 +34,32 @@ public class WebController {
 
   @GetMapping("/school-years")
   public String schoolYears(Model model, Authentication authentication) {
-    List<Submission> submissions = inspectionService.submissions();
-    Map<String, Long> counts =
-        submissions.stream()
-            .collect(Collectors.groupingBy(Submission::schoolYear, Collectors.counting()));
-    model.addAttribute("schoolYears", inspectionService.schoolYears());
-    model.addAttribute("submissionCounts", counts);
-    model.addAttribute("submissionWindow", inspectionService.submissionWindow());
-    model.addAttribute("userDisplayName", displayName(authentication));
+    populateSchoolYearsModel(model, authentication);
     return "school-years";
   }
 
   @PostMapping("/submission-window")
-  public String updateSubmissionWindow(@RequestParam LocalDate from, @RequestParam LocalDate to) {
+  public String updateSubmissionWindow(
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+      Model model,
+      Authentication authentication) {
+    if (from == null || to == null) {
+      return submissionWindowError(
+          model,
+          authentication,
+          "Innsendingsperioden er ugyldig fordi startdato og sluttdato må være satt.",
+          "Angi både fra-dato og til-dato før perioden kan lagres.");
+    }
+
+    if (from.isAfter(to)) {
+      return submissionWindowError(
+          model,
+          authentication,
+          "Innsendingsperioden er ugyldig fordi fra-dato er satt etter til-dato.",
+          "Korriger perioden slik at fra-dato er lik eller tidligere enn til-dato.");
+    }
+
     inspectionService.updateSubmissionWindow(new SubmissionWindow(from, to));
     return "redirect:/ui/school-years";
   }
@@ -138,6 +152,26 @@ public class WebController {
     return inspectionService.submissions().stream()
         .filter(submission -> schoolYear.equals(submission.schoolYear()))
         .toList();
+  }
+
+  private String submissionWindowError(
+      Model model, Authentication authentication, String explanation, String correction) {
+    model.addAttribute("submissionWindow", inspectionService.submissionWindow());
+    model.addAttribute("userDisplayName", displayName(authentication));
+    model.addAttribute("errorExplanation", explanation);
+    model.addAttribute("errorCorrection", correction);
+    return "submission-window-error";
+  }
+
+  private void populateSchoolYearsModel(Model model, Authentication authentication) {
+    List<Submission> submissions = inspectionService.submissions();
+    Map<String, Long> counts =
+        submissions.stream()
+            .collect(Collectors.groupingBy(Submission::schoolYear, Collectors.counting()));
+    model.addAttribute("schoolYears", inspectionService.schoolYears());
+    model.addAttribute("submissionCounts", counts);
+    model.addAttribute("submissionWindow", inspectionService.submissionWindow());
+    model.addAttribute("userDisplayName", displayName(authentication));
   }
 
   private SchoolView toSchoolView(List<Submission> submissions) {
