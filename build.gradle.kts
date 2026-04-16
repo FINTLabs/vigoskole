@@ -35,7 +35,7 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("com.squareup.okhttp3:mockwebserver:5.2.1")
+    testImplementation("com.squareup.okhttp3:mockwebserver:5.3.2")
 }
 
 tasks.withType<Test>().configureEach {
