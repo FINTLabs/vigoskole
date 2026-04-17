@@ -1,9 +1,8 @@
 {
   "@context": {
-    "fint": "https://novari.no/ontology/fint.ttl#",
-    "vigo": "https://novari.no/ontology/vigo-skole#"
+    "vigoskole": "https://novari.no/ontology/vigoskole#"
   },
-  "@type": "vigo:graduatingStudentSubmission",
+  "@type": "vigoskole:GraduatingStudentsSubmission",
   "students": [
     {
       "classCode": "10A",

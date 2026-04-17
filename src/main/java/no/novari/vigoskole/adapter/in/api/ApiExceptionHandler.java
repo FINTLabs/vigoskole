@@ -6,7 +6,6 @@ import no.novari.vigoskole.application.SchoolVerificationException;
 import no.novari.vigoskole.application.SubmissionRejectedException;
 import no.novari.vigoskole.application.SubmissionWindowClosedException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -24,7 +23,7 @@ public class ApiExceptionHandler {
   @ExceptionHandler(SubmissionRejectedException.class)
   ResponseEntity<String> handleRejected(SubmissionRejectedException exception) {
     return ResponseEntity.badRequest()
-        .contentType(MediaType.APPLICATION_JSON)
+        .contentType(SubmissionController.APPLICATION_LD_JSON)
         .body(
             submissionController.toPrettyJson(
                 new ErrorResponse(
@@ -41,7 +40,7 @@ public class ApiExceptionHandler {
   })
   ResponseEntity<String> handleForbidden(RuntimeException exception) {
     return ResponseEntity.status(HttpStatus.FORBIDDEN)
-        .contentType(MediaType.APPLICATION_JSON)
+        .contentType(SubmissionController.APPLICATION_LD_JSON)
         .body(
             submissionController.toPrettyJson(
                 new ErrorResponse("FORBIDDEN", exception.getMessage(), LocalDateTime.now(), null)));
@@ -50,14 +49,14 @@ public class ApiExceptionHandler {
   @ExceptionHandler({IllegalArgumentException.class, HttpMessageNotReadableException.class})
   ResponseEntity<String> handleBadRequest(Exception exception) {
     return ResponseEntity.badRequest()
-        .contentType(MediaType.APPLICATION_JSON)
+        .contentType(SubmissionController.APPLICATION_LD_JSON)
         .body(
             submissionController.toPrettyJson(
                 new ErrorResponse(
                     "BAD_REQUEST", exception.getMessage(), LocalDateTime.now(), null)));
   }
 
-  record ErrorResponse(
+  public record ErrorResponse(
       String errorCode,
       String message,
       LocalDateTime timestamp,

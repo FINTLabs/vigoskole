@@ -1,7 +1,13 @@
 package no.novari.vigoskole.adapter.in.api;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import no.novari.vigoskole.application.SubmissionService;
 import no.novari.vigoskole.config.SecurityConfig.JwtSubmitterContextResolver;
 import no.novari.vigoskole.domain.model.StudentRecord;
@@ -17,12 +23,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/api/submissions")
 public class SubmissionController {
+
+  static final MediaType APPLICATION_LD_JSON = MediaType.valueOf("application/ld+json");
 
   private final SubmissionService submissionService;
   private final JwtSubmitterContextResolver jwtSubmitterContextResolver;
@@ -39,15 +48,52 @@ public class SubmissionController {
 
   @PostMapping(
       path = "/graduating-students",
-      consumes = {MediaType.APPLICATION_JSON_VALUE, "application/ld+json"},
-      produces = MediaType.APPLICATION_JSON_VALUE)
+      consumes = "application/ld+json",
+      produces = "application/ld+json")
+  @Operation(
+      summary = "Submit graduating students",
+      description =
+          "Submits the complete list of graduating students for the current school year. "
+              + "The request and response bodies are JSON-LD.",
+      security = @SecurityRequirement(name = "maskinporten-jwt"),
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              required = true,
+              content =
+                  @Content(
+                      mediaType = "application/ld+json",
+                      schema = @Schema(implementation = GraduatingStudentsSubmissionRequest.class))),
+      responses = {
+        @ApiResponse(
+            responseCode = "201",
+            description = "Submission accepted (warnings allowed).",
+            content =
+                @Content(
+                    mediaType = "application/ld+json",
+                    schema = @Schema(implementation = SubmissionResponse.class))),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Validation errors in payload.",
+            content =
+                @Content(
+                    mediaType = "application/ld+json",
+                    schema = @Schema(implementation = ApiExceptionHandler.ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Submission not allowed.",
+            content =
+                @Content(
+                    mediaType = "application/ld+json",
+                    schema = @Schema(implementation = ApiExceptionHandler.ErrorResponse.class))),
+        @ApiResponse(responseCode = "401", description = "Unauthorized.")
+      })
   public ResponseEntity<String> submitGraduatingStudents(
       @RequestBody GraduatingStudentsSubmissionRequest request, @AuthenticationPrincipal Jwt jwt) {
     Submission submission =
         submissionService.submitGraduatingStudents(
             request.toDomain(), jwtSubmitterContextResolver.resolve(jwt));
     return ResponseEntity.status(HttpStatus.CREATED)
-        .contentType(MediaType.APPLICATION_JSON)
+        .contentType(APPLICATION_LD_JSON)
         .body(toPrettyJson(SubmissionResponse.from(submission)));
   }
 
@@ -84,6 +130,8 @@ public class SubmissionController {
   }
 
   public record SubmissionResponse(
+      @JsonProperty("@context") Map<String, String> context,
+      @JsonProperty("@type") String type,
       String submissionId,
       String schoolYear,
       String status,
@@ -95,6 +143,8 @@ public class SubmissionController {
 
     static SubmissionResponse from(Submission submission) {
       return new SubmissionResponse(
+          Map.of("vigoskole", "https://novari.no/ontology/vigoskole#"),
+          "vigoskole:Submission",
           submission.id().toString(),
           submission.schoolYear(),
           submission.status().name(),

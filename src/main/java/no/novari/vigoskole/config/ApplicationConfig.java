@@ -1,5 +1,9 @@
 package no.novari.vigoskole.config;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import java.net.http.HttpClient;
 import java.time.Clock;
 import no.novari.vigoskole.domain.validation.PersonIdentityNumberValidator;
@@ -11,6 +15,17 @@ import tools.jackson.databind.SerializationFeature;
 
 @Configuration
 @EnableConfigurationProperties(AppProperties.class)
+@OpenAPIDefinition(
+    info =
+        @Info(
+            title = "Vigo Skole API",
+            description = "API for innsending og inspeksjon av avgangselever.",
+            version = "v1"))
+@SecurityScheme(
+    name = "maskinporten-jwt",
+    type = SecuritySchemeType.HTTP,
+    scheme = "bearer",
+    bearerFormat = "JWT")
 public class ApplicationConfig {
 
   @Bean
