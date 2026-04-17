@@ -22,6 +22,12 @@
 
     <section class="card stack">
         <h2>Innsendingsperiode</h2>
+        <p>
+            Nåværende konfigurert periode:
+            <strong th:text="${submissionWindow.from()}">2026-01-01</strong>
+            til
+            <strong th:text="${submissionWindow.to()}">2026-12-31</strong>
+        </p>
         <form class="form-grid" th:action="@{/ui/submission-window}" method="post">
             <label>Fra
                 <input type="date" name="from" th:value="${submissionWindow.from()}">
