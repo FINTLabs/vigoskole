@@ -1,5 +1,6 @@
 package no.novari.vigoskole.adapter.in.api;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,7 +24,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
@@ -62,7 +62,8 @@ public class SubmissionController {
               content =
                   @Content(
                       mediaType = "application/ld+json",
-                      schema = @Schema(implementation = GraduatingStudentsSubmissionRequest.class))),
+                      schema =
+                          @Schema(implementation = GraduatingStudentsSubmissionRequest.class))),
       responses = {
         @ApiResponse(
             responseCode = "201",
