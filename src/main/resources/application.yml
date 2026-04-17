@@ -27,7 +27,7 @@ spring:
             user-name-attribute: sub
       resourceserver:
         jwt:
-          jwk-set-uri: ${MASKINPORTEN_JWK_SET_URI:https://maskinporten.no/.well-known/oauth-authorization-server}
+          jwk-set-uri: ${MASKINPORTEN_JWK_SET_URI:https://maskinporten.no/jwk}
 
 management:
   endpoints:
@@ -36,6 +36,9 @@ management:
         include: health,info
 
 app:
+  maskinporten:
+    expected-scope: ${MASKINPORTEN_SCOPE:novari:fakevigoskole}
+    jwk-cache-duration: ${MASKINPORTEN_JWK_CACHE_DURATION:PT24H}
   storage-directory: .data/eclipsestore
   submission-window:
     from: 2026-01-02

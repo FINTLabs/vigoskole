@@ -60,9 +60,9 @@ class WebControllerTest {
   @Test
   void shouldRenderSubmissionHierarchy() throws Exception {
     mockMvc
-        .perform(get("/ui/school-years/2025-2026/counties/03").with(user("fylkesbruker")))
+        .perform(get("/ui/school-years/2025-2026/counties/32").with(user("fylkesbruker")))
         .andExpect(status().isOk())
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("Test ungdomsskole")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Ås ungdomsskole")))
         .andExpect(
             content().string(org.hamcrest.Matchers.containsString("ACCEPTED_WITH_WARNINGS")));
   }

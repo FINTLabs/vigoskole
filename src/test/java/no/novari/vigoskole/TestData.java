@@ -30,7 +30,7 @@ public final class TestData {
   }
 
   public static SchoolInfo schoolInfo() {
-    return new SchoolInfo(SCHOOL_ORG_NUMBER, "Test ungdomsskole", "0301", "03", "1234");
+    return new SchoolInfo(SCHOOL_ORG_NUMBER, "Ås ungdomsskole", "3218", "32", "1540");
   }
 
   public static Submission submission(Submission.Status status) {
@@ -126,10 +126,27 @@ public final class TestData {
                     {
                       "type": "G",
                       "orgNr": "974603268",
-                      "name": "Test ungdomsskole",
-                      "municipalityNr": "0301",
-                      "countyNr": "03",
-                      "number": "1234"
+                      "name": "Ås ungdomsskole",
+                      "municipalityNr": "3218",
+                      "countyNr": "32",
+                      "number": "1540"
+                    }
+                  ]
+                }
+                """;
+  }
+
+  public static String kodeverkResponseWithoutMatchingSchool() {
+    return """
+                {
+                  "content": [
+                    {
+                      "type": "V",
+                      "orgNr": "974603268",
+                      "name": "Ikke ungdomsskole",
+                      "municipalityNr": "3218",
+                      "countyNr": "32",
+                      "number": "1540"
                     }
                   ]
                 }
