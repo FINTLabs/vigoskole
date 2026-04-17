@@ -27,11 +27,11 @@
         <h2>Nåværende konfigurert innsendingsperiode</h2>
         <p>
           <strong>Fra:</strong>
-          <span th:text="${submissionWindow.from()}">2026-01-01</span>
+          <span th:text="${#temporals.format(submissionWindow.from(), 'dd/MM/yyyy')}">01/01/2026</span>
         </p>
         <p>
           <strong>Til:</strong>
-          <span th:text="${submissionWindow.to()}">2026-12-31</span>
+          <span th:text="${#temporals.format(submissionWindow.to(), 'dd/MM/yyyy')}">31/12/2026</span>
         </p>
         <p>
           <a th:href="@{/ui/school-years}">Tilbake til oversikten</a>

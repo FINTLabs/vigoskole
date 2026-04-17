@@ -13,7 +13,7 @@
         <a th:href="@{/ui/school-years/{schoolYear}(schoolYear=${submission.schoolYear()})}" th:text="${submission.schoolYear()}">2025-2026</a>
         <span>/</span>
         <a th:href="@{/ui/school-years/{schoolYear}/counties/{countyNumber}(schoolYear=${submission.schoolYear()},countyNumber=${submission.school().countyNumber()})}"
-           th:text="${submission.school().countyNumber()}">03</a>
+           th:text="${submission.school().countyNumber()} + ' · ' + ${countyName}">03 · Oslo</a>
         <span>/</span>
         <a th:href="@{/ui/school-years/{schoolYear}/counties/{countyNumber}/schools/{orgNumber}(schoolYear=${submission.schoolYear()},countyNumber=${submission.school().countyNumber()},orgNumber=${submission.school().orgNumber()})}"
            th:text="${submission.school().name()}">Skole</a>
@@ -24,7 +24,7 @@
     <section class="topbar">
         <div>
             <h1 class="title">Innsending</h1>
-            <p class="subtitle" th:text="${submission.school().name()} + ' · ' + ${#temporals.format(submission.submittedAt().atZone(T(java.time.ZoneId).systemDefault()), 'yyyy-MM-dd HH:mm')}">Metadata</p>
+            <p class="subtitle" th:text="${submission.school().name()} + ' · ' + ${#temporals.format(submission.submittedAt().atZone(T(java.time.ZoneId).systemDefault()), 'dd/MM/yyyy HH:mm')}">Metadata</p>
         </div>
         <span class="muted" th:text="${userDisplayName}">bruker</span>
     </section>
@@ -35,6 +35,7 @@
             <div class="stack">
                 <div><strong>Status:</strong> <span class="badge" th:classappend="${submission.status()}" th:text="${submission.status()}">ACCEPTED</span></div>
                 <div><strong>Skoleår:</strong> <span th:text="${submission.schoolYear()}">2025-2026</span></div>
+                <div><strong>Innsendt:</strong> <span th:text="${#temporals.format(submission.submittedAt().atZone(T(java.time.ZoneId).systemDefault()), 'dd/MM/yyyy HH:mm')}">16/04/2026 12:15</span></div>
                 <div><strong>Innsendt av:</strong> <span th:text="${submission.submittedBy()}">bruker</span></div>
                 <div><strong>Leverandør:</strong> <span th:text="${submission.supplier() == null ? 'Direkte fra skole' : submission.supplier().name()}">Direkte fra skole</span></div>
             </div>
@@ -44,7 +45,9 @@
             <div class="stack">
                 <div><strong>Navn:</strong> <span th:text="${submission.school().name()}">Skole</span></div>
                 <div><strong>Org.nr:</strong> <span th:text="${submission.school().orgNumber()}">974603268</span></div>
+                <div><strong>Kommune:</strong> <span th:text="${municipalityName}">ÅS</span></div>
                 <div><strong>Kommunenr:</strong> <span th:text="${submission.school().municipalityNumber()}">0301</span></div>
+                <div><strong>Fylke:</strong> <span th:text="${countyName}">Akershus</span></div>
                 <div><strong>Fylkesnr:</strong> <span th:text="${submission.school().countyNumber()}">03</span></div>
                 <div><strong>Skolenr:</strong> <span th:text="${submission.school().schoolNumber()}">1234</span></div>
             </div>
@@ -58,6 +61,7 @@
             <tr>
                 <th>Linje</th>
                 <th>Klassekode</th>
+                <th>Fødselsnummer</th>
                 <th>Fødselsnummerstatus</th>
                 <th>Navn</th>
                 <th>Meldinger</th>
@@ -67,6 +71,7 @@
             <tr th:each="student : ${submission.validatedStudents()}">
                 <td th:text="${student.lineNumber()}">1</td>
                 <td th:text="${student.student().classCode()}">10A</td>
+                <td th:text="${student.student().formattedPersonalIdentityNumber()}">150491 00008</td>
                 <td>
                     <span class="badge"
                           th:classappend="${student.personNumberStatus().name() == 'INVALID' ? 'ERROR' : (student.personNumberStatus().name() == 'SYNTHETIC' ? 'WARNING' : '')}"

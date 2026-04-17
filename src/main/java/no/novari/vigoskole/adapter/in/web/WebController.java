@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import no.novari.vigoskole.application.InspectionService;
+import no.novari.vigoskole.application.SchoolDirectoryPort;
 import no.novari.vigoskole.domain.model.Submission;
 import no.novari.vigoskole.domain.model.SubmissionWindow;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -27,9 +28,12 @@ import org.springframework.web.server.ResponseStatusException;
 public class WebController {
 
   private final InspectionService inspectionService;
+  private final SchoolDirectoryPort schoolDirectoryPort;
 
-  public WebController(InspectionService inspectionService) {
+  public WebController(
+      InspectionService inspectionService, SchoolDirectoryPort schoolDirectoryPort) {
     this.inspectionService = inspectionService;
+    this.schoolDirectoryPort = schoolDirectoryPort;
   }
 
   @GetMapping("/school-years")
@@ -79,9 +83,7 @@ public class WebController {
             .map(
                 entry ->
                     new CountyView(
-                        entry.getKey(),
-                        entry.getValue().getFirst().school().countyNumber(),
-                        entry.getValue().size()))
+                        entry.getKey(), countyName(entry.getKey()), entry.getValue().size()))
             .toList());
     model.addAttribute("userDisplayName", displayName(authentication));
     return "school-year";
@@ -102,6 +104,7 @@ public class WebController {
             .collect(Collectors.groupingBy(submission -> submission.school().orgNumber()));
     model.addAttribute("schoolYear", schoolYear);
     model.addAttribute("countyNumber", countyNumber);
+    model.addAttribute("countyName", countyName(countyNumber));
     model.addAttribute(
         "schools",
         schools.values().stream()
@@ -130,6 +133,7 @@ public class WebController {
     }
     model.addAttribute("schoolYear", schoolYear);
     model.addAttribute("countyNumber", countyNumber);
+    model.addAttribute("countyName", countyName(countyNumber));
     model.addAttribute("school", submissions.getFirst().school());
     model.addAttribute("submissions", submissions);
     model.addAttribute("userDisplayName", displayName(authentication));
@@ -144,6 +148,9 @@ public class WebController {
             .submission(submissionId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     model.addAttribute("submission", submission);
+    model.addAttribute("countyName", countyName(submission.school().countyNumber()));
+    model.addAttribute(
+        "municipalityName", municipalityName(submission.school().municipalityNumber()));
     model.addAttribute("userDisplayName", displayName(authentication));
     return "submission";
   }
@@ -168,8 +175,12 @@ public class WebController {
     Map<String, Long> counts =
         submissions.stream()
             .collect(Collectors.groupingBy(Submission::schoolYear, Collectors.counting()));
-    model.addAttribute("schoolYears", inspectionService.schoolYears());
-    model.addAttribute("submissionCounts", counts);
+    model.addAttribute(
+        "schoolYears",
+        inspectionService.schoolYears().stream()
+            .sorted(Comparator.reverseOrder())
+            .map(schoolYear -> new SchoolYearView(schoolYear, counts.getOrDefault(schoolYear, 0L)))
+            .toList());
     model.addAttribute("submissionWindow", inspectionService.submissionWindow());
     model.addAttribute("userDisplayName", displayName(authentication));
   }
@@ -189,7 +200,17 @@ public class WebController {
     return principal == null ? "Ikke innlogget" : principal.getName();
   }
 
+  private String countyName(String countyNumber) {
+    return schoolDirectoryPort.findCountyShortName(countyNumber).orElse(countyNumber);
+  }
+
+  private String municipalityName(String municipalityNumber) {
+    return schoolDirectoryPort.findMunicipalityName(municipalityNumber).orElse(municipalityNumber);
+  }
+
   public record CountyView(String countyNumber, String countyName, int submissions) {}
+
+  public record SchoolYearView(String schoolYear, long submissions) {}
 
   public record SchoolView(
       String orgNumber, String schoolNumber, String schoolName, String status, int submissions) {}

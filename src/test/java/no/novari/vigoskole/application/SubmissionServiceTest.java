@@ -35,7 +35,7 @@ class SubmissionServiceTest {
         new SubmissionService(
             submissionRepository,
             submissionWindowRepository,
-            orgNumber -> Optional.of(TestData.schoolInfo()),
+            schoolDirectoryPort(),
             new PersonIdentityNumberValidator(),
             Clock.fixed(Instant.parse("2026-04-16T10:15:30Z"), ZoneOffset.UTC));
   }
@@ -88,7 +88,7 @@ class SubmissionServiceTest {
             submissionRepository,
             new InMemorySubmissionWindowRepository(
                 new SubmissionWindow(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 31))),
-            orgNumber -> Optional.of(TestData.schoolInfo()),
+            schoolDirectoryPort(),
             new PersonIdentityNumberValidator(),
             Clock.fixed(Instant.parse("2026-04-16T10:15:30Z"), ZoneOffset.UTC));
 
@@ -98,6 +98,26 @@ class SubmissionServiceTest {
                     List.of(TestData.validStudent()),
                     new SubmitterContext(TestData.SCHOOL_ORG_NUMBER, "Test ungdomsskole", null)))
         .isInstanceOf(SubmissionWindowClosedException.class);
+  }
+
+  private SchoolDirectoryPort schoolDirectoryPort() {
+    return new SchoolDirectoryPort() {
+      @Override
+      public Optional<no.novari.vigoskole.domain.model.SchoolInfo> findLowerSecondarySchool(
+          String orgNumber) {
+        return Optional.of(TestData.schoolInfo());
+      }
+
+      @Override
+      public Optional<String> findCountyShortName(String countyNumber) {
+        return Optional.of("Akershus");
+      }
+
+      @Override
+      public Optional<String> findMunicipalityName(String municipalityNumber) {
+        return Optional.of("ÅS");
+      }
+    };
   }
 
   private static final class InMemorySubmissionRepository implements SubmissionRepository {

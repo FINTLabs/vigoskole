@@ -143,7 +143,7 @@ public class SubmissionService {
                 "personalIdentityNumber",
                 "SYNTHETIC_IDENTITY_NUMBER",
                 ValidationMessage.Severity.WARNING,
-                "Fiktivt fødselsnummer er tillatt, men markeres som advarsel."));
+                "Sjekk om f-nr eller d-nr er tilgjengelig"));
       }
 
       if (student.classCode() == null || student.classCode().isBlank()) {

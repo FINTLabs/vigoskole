@@ -13,17 +13,9 @@ class VigoKodeverkSchoolDirectoryAdapterTest {
 
   @Test
   void executeLookupShouldReturnAsUngdomsskoleFromRealVigoKodeverk() {
-    VigoKodeverkSchoolDirectoryAdapter adapter =
-        new VigoKodeverkSchoolDirectoryAdapter(
-            HttpClient.newHttpClient(),
-            new ObjectMapper(),
-            new AppProperties(
-                Path.of(".data/eclipsestore"),
-                new AppProperties.SubmissionWindowProperties(
-                    java.time.LocalDate.of(2026, 1, 1), java.time.LocalDate.of(2026, 12, 31)),
-                new AppProperties.VigoKodeverkProperties("https://kodeverk.vigo.no")));
+    VigoKodeverkSchoolDirectoryAdapter adapter = adapter();
 
-    JsonNode response = adapter.executeLookup("974603268");
+    JsonNode response = adapter.executeSchoolLookup("974603268");
 
     assertThat(response).isNotNull();
     assertThat(response.has("content")).isTrue();
@@ -35,5 +27,30 @@ class VigoKodeverkSchoolDirectoryAdapterTest {
               assertThat(entry.path("type").asText()).isEqualTo("G");
               assertThat(entry.path("name").asText()).isEqualTo("Ås ungdomsskole");
             });
+  }
+
+  @Test
+  void findCountyShortNameShouldReturnShortNameFromRealVigoKodeverk() {
+    VigoKodeverkSchoolDirectoryAdapter adapter = adapter();
+
+    assertThat(adapter.findCountyShortName("32")).contains("Akershus");
+  }
+
+  @Test
+  void findMunicipalityNameShouldReturnNameFromRealVigoKodeverk() {
+    VigoKodeverkSchoolDirectoryAdapter adapter = adapter();
+
+    assertThat(adapter.findMunicipalityName("3218")).contains("ÅS");
+  }
+
+  private VigoKodeverkSchoolDirectoryAdapter adapter() {
+    return new VigoKodeverkSchoolDirectoryAdapter(
+        HttpClient.newHttpClient(),
+        new ObjectMapper(),
+        new AppProperties(
+            Path.of(".data/eclipsestore"),
+            new AppProperties.SubmissionWindowProperties(
+                java.time.LocalDate.of(2026, 1, 1), java.time.LocalDate.of(2026, 12, 31)),
+            new AppProperties.VigoKodeverkProperties("https://kodeverk.vigo.no")));
   }
 }

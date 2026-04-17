@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/api/submissions")
@@ -24,24 +26,37 @@ public class SubmissionController {
 
   private final SubmissionService submissionService;
   private final JwtSubmitterContextResolver jwtSubmitterContextResolver;
+  private final ObjectMapper objectMapper;
 
   public SubmissionController(
       SubmissionService submissionService,
-      JwtSubmitterContextResolver jwtSubmitterContextResolver) {
+      JwtSubmitterContextResolver jwtSubmitterContextResolver,
+      ObjectMapper objectMapper) {
     this.submissionService = submissionService;
     this.jwtSubmitterContextResolver = jwtSubmitterContextResolver;
+    this.objectMapper = objectMapper;
   }
 
   @PostMapping(
       path = "/graduating-students",
       consumes = {MediaType.APPLICATION_JSON_VALUE, "application/ld+json"},
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<SubmissionResponse> submitGraduatingStudents(
+  public ResponseEntity<String> submitGraduatingStudents(
       @RequestBody GraduatingStudentsSubmissionRequest request, @AuthenticationPrincipal Jwt jwt) {
     Submission submission =
         submissionService.submitGraduatingStudents(
             request.toDomain(), jwtSubmitterContextResolver.resolve(jwt));
-    return ResponseEntity.status(HttpStatus.CREATED).body(SubmissionResponse.from(submission));
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(toPrettyJson(SubmissionResponse.from(submission)));
+  }
+
+  String toPrettyJson(Object body) {
+    try {
+      return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(body);
+    } catch (JacksonException exception) {
+      throw new IllegalStateException("Kunne ikke serialisere API-respons.", exception);
+    }
   }
 
   public record GraduatingStudentsSubmissionRequest(List<StudentRequest> students) {

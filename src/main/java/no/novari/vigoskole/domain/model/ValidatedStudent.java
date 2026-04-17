@@ -21,7 +21,7 @@ public record ValidatedStudent(
   public enum PersonNumberStatus {
     F_NUMBER("F-nr"),
     D_NUMBER("D-nr"),
-    SYNTHETIC("Fiktivt nr"),
+    SYNTHETIC("Fiktivt f-nr"),
     INVALID("Ugyldig");
 
     private final String displayValue;

@@ -2,7 +2,7 @@
 <html lang="no" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="'Fylke ' + ${countyNumber}">Fylke</title>
+    <title th:text="'Fylke ' + ${countyNumber} + ' · ' + ${countyName}">Fylke</title>
     <link rel="stylesheet" th:href="@{/app.css}">
 </head>
 <body>
@@ -12,12 +12,12 @@
         <span>/</span>
         <a th:href="@{/ui/school-years/{schoolYear}(schoolYear=${schoolYear})}" th:text="${schoolYear}">2025-2026</a>
         <span>/</span>
-        <span th:text="${countyNumber}">03</span>
+        <span th:text="${countyNumber} + ' · ' + ${countyName}">03 · Oslo</span>
     </div>
 
     <section class="topbar">
         <div>
-            <h1 class="title" th:text="'Fylke ' + ${countyNumber}">Fylke 03</h1>
+            <h1 class="title" th:text="'Fylke ' + ${countyNumber} + ' · ' + ${countyName}">Fylke 03 · Oslo</h1>
             <p class="subtitle">Ungdomsskoler og innsendingstatus.</p>
         </div>
         <span class="muted" th:text="${userDisplayName}">bruker</span>

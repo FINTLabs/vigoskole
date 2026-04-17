@@ -1,0 +1,169 @@
+{
+  "@context": {
+    "fint": "https://novari.no/ontology/fint.ttl#",
+    "vigo": "https://novari.no/ontology/vigo-skole#"
+  },
+  "@type": "vigo:graduatingStudentSubmission",
+  "students": [
+    {
+      "classCode": "10A",
+      "personalIdentityNumber": "01010100050",
+      "name": {
+        "firstName": "Ola",
+        "lastName": "Nordmann"
+      }
+    },
+    {
+      "classCode": "10A",
+      "personalIdentityNumber": "01010100069",
+      "name": {
+        "firstName": "Emma",
+        "lastName": "Hansen"
+      }
+    },
+    {
+      "classCode": "10A",
+      "personalIdentityNumber": "01010100077",
+      "name": {
+        "firstName": "Noah",
+        "lastName": "Johansen"
+      }
+    },
+    {
+      "classCode": "10A",
+      "personalIdentityNumber": "01010100085",
+      "name": {
+        "firstName": "Leah",
+        "lastName": "Olsen"
+      }
+    },
+    {
+      "classCode": "10B",
+      "personalIdentityNumber": "01010100131",
+      "name": {
+        "firstName": "William",
+        "lastName": "Larsen"
+      }
+    },
+    {
+      "classCode": "10B",
+      "personalIdentityNumber": "01010100158",
+      "name": {
+        "firstName": "Sofie",
+        "lastName": "Andersen"
+      }
+    },
+    {
+      "classCode": "10B",
+      "personalIdentityNumber": "01010100166",
+      "name": {
+        "firstName": "Lucas",
+        "lastName": "Nilsen"
+      }
+    },
+    {
+      "classCode": "10B",
+      "personalIdentityNumber": "01010100212",
+      "name": {
+        "firstName": "Maja",
+        "lastName": "Berg"
+      }
+    },
+    {
+      "classCode": "10C",
+      "personalIdentityNumber": "41010100044",
+      "name": {
+        "firstName": "Dina",
+        "lastName": "Dahl"
+      }
+    },
+    {
+      "classCode": "10C",
+      "personalIdentityNumber": "41010100052",
+      "name": {
+        "firstName": "Filip",
+        "lastName": "Solberg"
+      }
+    },
+    {
+      "classCode": "10C",
+      "personalIdentityNumber": "41010100060",
+      "name": {
+        "firstName": "Ingrid",
+        "lastName": "Lie"
+      }
+    },
+    {
+      "classCode": "10C",
+      "personalIdentityNumber": "41010100079",
+      "name": {
+        "firstName": "Jakob",
+        "lastName": "Aas"
+      }
+    },
+    {
+      "classCode": "10D",
+      "personalIdentityNumber": "41010100125",
+      "name": {
+        "firstName": "Nora",
+        "lastName": "Moen"
+      }
+    },
+    {
+      "classCode": "10D",
+      "personalIdentityNumber": "41010100133",
+      "name": {
+        "firstName": "Elias",
+        "lastName": "Myhre"
+      }
+    },
+    {
+      "classCode": "10D",
+      "personalIdentityNumber": "41010190019",
+      "name": {
+        "firstName": "Kari",
+        "lastName": "Syntetisk"
+      }
+    },
+    {
+      "classCode": "10D",
+      "personalIdentityNumber": "41010190027",
+      "name": {
+        "firstName": "Henrik",
+        "lastName": "Reserve"
+      }
+    },
+    {
+      "classCode": "10E",
+      "personalIdentityNumber": "41010190035",
+      "name": {
+        "firstName": "Sara",
+        "lastName": "Vestby"
+      }
+    },
+    {
+      "classCode": "10E",
+      "personalIdentityNumber": "41010190043",
+      "name": {
+        "firstName": "Magnus",
+        "lastName": "Gran"
+      }
+    },
+    {
+      "classCode": "10E",
+      "personalIdentityNumber": "41010190108",
+      "name": {
+        "firstName": "Ida",
+        "lastName": "Lunde"
+      }
+    },
+    {
+      "classCode": "10E",
+      "personalIdentityNumber": "41010190116",
+      "name": {
+        "firstName": "Tobias",
+        "lastName": "Haug"
+      }
+    }
+  ]
+}

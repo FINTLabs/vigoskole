@@ -6,6 +6,9 @@ spring:
       enabled: true
   thymeleaf:
     cache: false
+  jackson:
+    serialization:
+      indent-output: true
   security:
     oauth2:
       client:

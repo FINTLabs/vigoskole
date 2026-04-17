@@ -2,6 +2,13 @@ package no.novari.vigoskole.domain.model;
 
 public record StudentRecord(String classCode, String personalIdentityNumber, PersonName name) {
 
+  public String formattedPersonalIdentityNumber() {
+    if (personalIdentityNumber == null || personalIdentityNumber.length() != 11) {
+      return personalIdentityNumber == null ? "" : personalIdentityNumber;
+    }
+    return personalIdentityNumber.substring(0, 6) + " " + personalIdentityNumber.substring(6);
+  }
+
   public record PersonName(String firstName, String middleName, String lastName) {
 
     public String formatted() {

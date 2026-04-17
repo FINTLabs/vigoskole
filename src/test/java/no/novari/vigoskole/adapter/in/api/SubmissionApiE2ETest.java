@@ -90,6 +90,7 @@ class SubmissionApiE2ETest {
     assertThat(firstResponse.body()).contains("ACCEPTED_WITH_WARNINGS");
     assertThat(firstResponse.body()).contains("Ås ungdomsskole");
     assertThat(firstResponse.body()).contains("991825827");
+    assertThat(firstResponse.body()).contains("\n  \"submissionId\"");
     assertThat(lastKodeverkRequestMethod).isEqualTo("POST");
     assertThat(lastKodeverkRequestPath).isEqualTo("/api/schools?page=0&size=10");
     assertThat(lastKodeverkRequestBody).contains("974603268");

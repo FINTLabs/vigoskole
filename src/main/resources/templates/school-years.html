@@ -25,9 +25,9 @@
         <h2>Innsendingsperiode</h2>
         <p>
             Nåværende konfigurert periode:
-            <strong th:text="${submissionWindow.from()}">2026-01-01</strong>
+            <strong th:text="${#temporals.format(submissionWindow.from(), 'dd/MM/yyyy')}">01/01/2026</strong>
             til
-            <strong th:text="${submissionWindow.to()}">2026-12-31</strong>
+            <strong th:text="${#temporals.format(submissionWindow.to(), 'dd/MM/yyyy')}">31/12/2026</strong>
         </p>
         <form class="form-grid" th:action="@{/ui/submission-window}" method="post">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
@@ -41,16 +41,28 @@
         </form>
     </section>
 
-    <section class="grid two">
-        <article class="card stack" th:each="schoolYear : ${schoolYears}">
-            <div class="badge" th:text="${submissionCounts[schoolYear]} + ' innsendinger'">0 innsendinger</div>
-            <h2 th:text="${schoolYear}">2025-2026</h2>
-            <a th:href="@{/ui/school-years/{schoolYear}(schoolYear=${schoolYear})}">Åpne skoleår</a>
-        </article>
-        <article class="card" th:if="${#lists.isEmpty(schoolYears)}">
-            <h2>Ingen innsendinger ennå</h2>
-            <p class="muted">Når API-et mottar opplastninger, blir de tilgjengelige her.</p>
-        </article>
+    <section class="card" th:if="${!#lists.isEmpty(schoolYears)}">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Skoleår</th>
+                <th>Innsendinger</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="schoolYear : ${schoolYears}">
+                <td>
+                    <a th:href="@{/ui/school-years/{schoolYear}(schoolYear=${schoolYear.schoolYear()})}"
+                       th:text="${schoolYear.schoolYear()}">2025-2026</a>
+                </td>
+                <td th:text="${schoolYear.submissions()}">0</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+    <section class="card" th:if="${#lists.isEmpty(schoolYears)}">
+        <h2>Ingen innsendinger ennå</h2>
+        <p class="muted">Når API-et mottar opplastninger, blir de tilgjengelige her.</p>
     </section>
 </main>
 </body>

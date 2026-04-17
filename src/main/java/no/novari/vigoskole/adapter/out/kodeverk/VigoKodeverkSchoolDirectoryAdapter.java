@@ -21,10 +21,15 @@ import tools.jackson.databind.ObjectMapper;
 public class VigoKodeverkSchoolDirectoryAdapter implements SchoolDirectoryPort {
 
   static final String SCHOOL_LOOKUP_PATH = "/api/schools?page=0&size=10";
+  static final String COUNTY_LOOKUP_PATH = "/api/counties?page=0&size=10&sort=countyNr,asc";
+  static final String MUNICIPALITY_LOOKUP_PATH =
+      "/api/municipalities?page=0&size=10&sort=municipalityNr,asc";
 
   private final HttpClient httpClient;
   private final ObjectMapper objectMapper;
   private final URI schoolLookupUri;
+  private final URI countyLookupUri;
+  private final URI municipalityLookupUri;
 
   public VigoKodeverkSchoolDirectoryAdapter(
       HttpClient httpClient, ObjectMapper objectMapper, AppProperties appProperties) {
@@ -32,11 +37,15 @@ public class VigoKodeverkSchoolDirectoryAdapter implements SchoolDirectoryPort {
     this.objectMapper = objectMapper;
     this.schoolLookupUri =
         URI.create(appProperties.vigoKodeverk().baseUrl()).resolve(SCHOOL_LOOKUP_PATH);
+    this.countyLookupUri =
+        URI.create(appProperties.vigoKodeverk().baseUrl()).resolve(COUNTY_LOOKUP_PATH);
+    this.municipalityLookupUri =
+        URI.create(appProperties.vigoKodeverk().baseUrl()).resolve(MUNICIPALITY_LOOKUP_PATH);
   }
 
   @Override
   public Optional<SchoolInfo> findLowerSecondarySchool(String orgNumber) {
-    JsonNode response = executeLookup(orgNumber);
+    JsonNode response = executeSchoolLookup(orgNumber);
 
     if (response == null || !response.has("content") || !response.get("content").isArray()) {
       return Optional.empty();
@@ -58,11 +67,57 @@ public class VigoKodeverkSchoolDirectoryAdapter implements SchoolDirectoryPort {
     return Optional.empty();
   }
 
-  JsonNode executeLookup(String orgNumber) {
-    String requestBody = serializeRequest(orgNumber);
+  @Override
+  public Optional<String> findCountyShortName(String countyNumber) {
+    JsonNode response = executeCountyLookup(countyNumber);
+
+    if (response == null || !response.has("content") || !response.get("content").isArray()) {
+      return Optional.empty();
+    }
+
+    for (JsonNode entry : response.get("content")) {
+      String candidateCountyNumber = findValue(entry, "countyNr");
+      if (countyNumber.equals(candidateCountyNumber)) {
+        return Optional.ofNullable(findValue(entry, "shortName"));
+      }
+    }
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<String> findMunicipalityName(String municipalityNumber) {
+    JsonNode response = executeMunicipalityLookup(municipalityNumber);
+
+    if (response == null || !response.has("content") || !response.get("content").isArray()) {
+      return Optional.empty();
+    }
+
+    for (JsonNode entry : response.get("content")) {
+      String candidateMunicipalityNumber = findValue(entry, "municipalityNr");
+      if (municipalityNumber.equals(candidateMunicipalityNumber)) {
+        return Optional.ofNullable(findValue(entry, "name"));
+      }
+    }
+    return Optional.empty();
+  }
+
+  JsonNode executeSchoolLookup(String orgNumber) {
+    return executeLookup(schoolLookupUri, "orgNr", orgNumber);
+  }
+
+  JsonNode executeCountyLookup(String countyNumber) {
+    return executeLookup(countyLookupUri, "countyNr", countyNumber);
+  }
+
+  JsonNode executeMunicipalityLookup(String municipalityNumber) {
+    return executeLookup(municipalityLookupUri, "municipalityNr", municipalityNumber);
+  }
+
+  private JsonNode executeLookup(URI lookupUri, String key, String value) {
+    String requestBody = serializeRequest(key, value);
     HttpRequest request =
         HttpRequest.newBuilder()
-            .uri(schoolLookupUri)
+            .uri(lookupUri)
             .header("Content-Type", "application/json")
             .header("Accept", "application/json")
             .POST(HttpRequest.BodyPublishers.ofString(requestBody, StandardCharsets.UTF_8))
@@ -84,9 +139,9 @@ public class VigoKodeverkSchoolDirectoryAdapter implements SchoolDirectoryPort {
     }
   }
 
-  private String serializeRequest(String orgNumber) {
+  private String serializeRequest(String key, String value) {
     return objectMapper.writeValueAsString(
-        List.of(Map.of("key", "orgNr", "value", orgNumber, "operation", "EQUAL")));
+        List.of(Map.of("key", key, "value", value, "operation", "EQUAL")));
   }
 
   private String findValue(JsonNode node, String key) {
