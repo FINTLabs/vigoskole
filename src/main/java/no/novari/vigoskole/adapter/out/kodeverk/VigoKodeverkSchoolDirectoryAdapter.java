@@ -1,35 +1,42 @@
 package no.novari.vigoskole.adapter.out.kodeverk;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import no.novari.vigoskole.application.SchoolDirectoryPort;
+import no.novari.vigoskole.application.SchoolVerificationException;
+import no.novari.vigoskole.config.AppProperties;
 import no.novari.vigoskole.domain.model.SchoolInfo;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 public class VigoKodeverkSchoolDirectoryAdapter implements SchoolDirectoryPort {
 
-  private final RestClient restClient;
+  static final String SCHOOL_LOOKUP_PATH = "/api/schools?page=0&size=10";
 
-  public VigoKodeverkSchoolDirectoryAdapter(RestClient vigoKodeverkRestClient) {
-    this.restClient = vigoKodeverkRestClient;
+  private final HttpClient httpClient;
+  private final ObjectMapper objectMapper;
+  private final URI schoolLookupUri;
+
+  public VigoKodeverkSchoolDirectoryAdapter(
+      HttpClient httpClient, ObjectMapper objectMapper, AppProperties appProperties) {
+    this.httpClient = httpClient;
+    this.objectMapper = objectMapper;
+    this.schoolLookupUri =
+        URI.create(appProperties.vigoKodeverk().baseUrl()).resolve(SCHOOL_LOOKUP_PATH);
   }
 
   @Override
   public Optional<SchoolInfo> findLowerSecondarySchool(String orgNumber) {
-    JsonNode response =
-        restClient
-            .method(HttpMethod.GET)
-            .uri("/api/schools?page=0&size=10")
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(List.of(Map.of("key", "orgNr", "value", orgNumber, "operation", "EQUAL")))
-            .retrieve()
-            .body(JsonNode.class);
+    JsonNode response = executeLookup(orgNumber);
 
     if (response == null || !response.has("content") || !response.get("content").isArray()) {
       return Optional.empty();
@@ -49,6 +56,37 @@ public class VigoKodeverkSchoolDirectoryAdapter implements SchoolDirectoryPort {
       }
     }
     return Optional.empty();
+  }
+
+  JsonNode executeLookup(String orgNumber) {
+    String requestBody = serializeRequest(orgNumber);
+    HttpRequest request =
+        HttpRequest.newBuilder()
+            .uri(schoolLookupUri)
+            .header("Content-Type", "application/json")
+            .header("Accept", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(requestBody, StandardCharsets.UTF_8))
+            .build();
+    try {
+      HttpResponse<String> response =
+          httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+      if (response.statusCode() < 200 || response.statusCode() >= 300) {
+        throw new SchoolVerificationException(
+            "Oppslag mot VIGO Kodeverk feilet med HTTP " + response.statusCode() + ".");
+      }
+      return objectMapper.readTree(response.body());
+    } catch (IOException exception) {
+      throw new SchoolVerificationException(
+          "Oppslag mot VIGO Kodeverk feilet på grunn av I/O-feil.");
+    } catch (InterruptedException exception) {
+      Thread.currentThread().interrupt();
+      throw new SchoolVerificationException("Oppslag mot VIGO Kodeverk ble avbrutt.");
+    }
+  }
+
+  private String serializeRequest(String orgNumber) {
+    return objectMapper.writeValueAsString(
+        List.of(Map.of("key", "orgNr", "value", orgNumber, "operation", "EQUAL")));
   }
 
   private String findValue(JsonNode node, String key) {

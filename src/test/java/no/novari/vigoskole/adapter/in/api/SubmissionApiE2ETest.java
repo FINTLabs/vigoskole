@@ -42,6 +42,8 @@ class SubmissionApiE2ETest {
   private static HttpServer kodeverkServer;
   private static final Queue<String> queuedResponses = new ArrayDeque<>();
   private static volatile String lastKodeverkRequestBody;
+  private static volatile String lastKodeverkRequestMethod;
+  private static volatile String lastKodeverkRequestPath;
 
   @LocalServerPort private int port;
 
@@ -54,6 +56,8 @@ class SubmissionApiE2ETest {
   void clearQueuedResponses() {
     queuedResponses.clear();
     lastKodeverkRequestBody = null;
+    lastKodeverkRequestMethod = null;
+    lastKodeverkRequestPath = null;
   }
 
   @AfterAll
@@ -86,6 +90,8 @@ class SubmissionApiE2ETest {
     assertThat(firstResponse.body()).contains("ACCEPTED_WITH_WARNINGS");
     assertThat(firstResponse.body()).contains("Ås ungdomsskole");
     assertThat(firstResponse.body()).contains("991825827");
+    assertThat(lastKodeverkRequestMethod).isEqualTo("POST");
+    assertThat(lastKodeverkRequestPath).isEqualTo("/api/schools?page=0&size=10");
     assertThat(lastKodeverkRequestBody).contains("974603268");
     assertThat(secondResponse.statusCode()).isEqualTo(403);
     assertThat(secondResponse.body()).contains("godkjent innsending");
@@ -170,6 +176,8 @@ class SubmissionApiE2ETest {
                   new String(
                       exchange.getRequestBody().readAllBytes(),
                       java.nio.charset.StandardCharsets.UTF_8);
+              lastKodeverkRequestMethod = exchange.getRequestMethod();
+              lastKodeverkRequestPath = exchange.getRequestURI().toString();
               String response = queuedResponses.poll();
               if (response == null) {
                 exchange.sendResponseHeaders(500, 0);

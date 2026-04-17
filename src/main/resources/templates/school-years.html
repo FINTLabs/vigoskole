@@ -15,6 +15,7 @@
         <div class="user-panel">
             <span class="muted" th:text="${userDisplayName}">bruker</span>
             <form th:action="@{/logout}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <button type="submit">Logg ut</button>
             </form>
         </div>
@@ -29,6 +30,7 @@
             <strong th:text="${submissionWindow.to()}">2026-12-31</strong>
         </p>
         <form class="form-grid" th:action="@{/ui/submission-window}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <label>Fra
                 <input type="date" name="from" th:value="${submissionWindow.from()}">
             </label>

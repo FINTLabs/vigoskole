@@ -73,6 +73,13 @@ class SecurityConfigJwtDecoderTest {
   }
 
   @Test
+  void shouldRejectLocalTestTokenOutsideTestProfile() {
+    JwtDecoder decoder = jwtDecoder();
+
+    assertThatThrownBy(() -> decoder.decode("local-test-token")).isInstanceOf(JwtException.class);
+  }
+
+  @Test
   void shouldRejectTokenSignedWithKeyNotPublishedByMaskinporten() throws Exception {
     mockWebServer.enqueue(
         new MockResponse()

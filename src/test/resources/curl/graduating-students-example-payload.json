@@ -1,0 +1,41 @@
+{
+  "@context": {
+    "fint": "https://novari.no/ontology/fint.ttl#",
+    "vigo": "https://novari.no/ontology/vigo-skole#"
+  },
+  "@type": "vigo:graduatingStudentSubmission",
+  "students": [
+    {
+      "classCode": "10A",
+      "personalIdentityNumber": "15049100008",
+      "name": {
+        "firstName": "Ola",
+        "lastName": "Nordmann"
+      }
+    },
+    {
+      "classCode": "10A",
+      "personalIdentityNumber": "41128500071",
+      "name": {
+        "firstName": "Dina",
+        "lastName": "Dahl"
+      }
+    },
+    {
+      "classCode": "10B",
+      "personalIdentityNumber": "42059190061",
+      "name": {
+        "firstName": "Kari",
+        "lastName": "Nordmann"
+      }
+    },
+    {
+      "classCode": "10B",
+      "personalIdentityNumber": "12345678901",
+      "name": {
+        "firstName": "Ulla",
+        "lastName": "Ugyldig"
+      }
+    }
+  ]
+}

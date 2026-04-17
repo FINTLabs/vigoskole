@@ -1,11 +1,11 @@
 package no.novari.vigoskole.config;
 
+import java.net.http.HttpClient;
 import java.time.Clock;
 import no.novari.vigoskole.domain.validation.PersonIdentityNumberValidator;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestClient;
 
 @Configuration
 @EnableConfigurationProperties(AppProperties.class)
@@ -22,7 +22,7 @@ public class ApplicationConfig {
   }
 
   @Bean
-  RestClient vigoKodeverkRestClient(AppProperties appProperties) {
-    return RestClient.builder().baseUrl(appProperties.vigoKodeverk().baseUrl()).build();
+  HttpClient httpClient() {
+    return HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
   }
 }

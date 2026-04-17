@@ -1,0 +1,14 @@
+app:
+  dev:
+    user:
+      username: ${DEV_WEB_USERNAME:dev}
+      password: ${DEV_WEB_PASSWORD:devpass}
+  maskinporten:
+    expected-scope: ${MASKINPORTEN_SCOPE:novari:fakevigoskole}
+    test-token:
+      value: ${MASKINPORTEN_DEV_TOKEN:local-test-token}
+      consumer-org-number: ${MASKINPORTEN_DEV_CONSUMER_ORG_NUMBER:974603268}
+      consumer-name: ${MASKINPORTEN_DEV_CONSUMER_NAME:Ås ungdomsskole}
+      supplier-org-number: ${MASKINPORTEN_DEV_SUPPLIER_ORG_NUMBER:}
+      supplier-name: ${MASKINPORTEN_DEV_SUPPLIER_NAME:}
+      delegation-source: ${MASKINPORTEN_DEV_DELEGATION_SOURCE:https://www.altinn.no}
