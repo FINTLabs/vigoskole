@@ -1,234 +1,562 @@
 @prefix vigoskole: <https://novari.no/ontology/vigoskole#> .
-@prefix elm: <http://data.europa.eu/snb/model/elm/> .
-@prefix person: <https://data.norge.no/informationmodel/Person/> .
-@prefix enhet: <https://data.norge.no/informationmodel/Enhet/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix schema: <https://schema.org/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-<https://novari.no/ontology/vigoskole> a owl:Ontology ;
-  dcterms:title "Vigo Skole API Ontology"@en ;
-  dcterms:title "Vigo Skole API Ontologi"@nb ;
-  dcterms:description "Ontology describing Vigo Skole API requests and responses for graduating students submissions."@en ;
-  dcterms:description "Ontologi for Vigo Skole API foresporsler og responser for innsending av avgangselever."@nb ;
-  dcterms:creator "Novari" ;
-  owl:imports <http://data.europa.eu/snb/model/elm/> ;
-  owl:versionInfo "0.1.0" .
+<https://novari.no/ontology/vigoskole>
+    a owl:Ontology ;
+    dcterms:title "Vigo Skole"@en,
+        "Vigo Skole"@nb ;
+    dcterms:description "Ontology requests and responses exposed by the Vigo Skole service."@en,
+        "Ontologi for forespørsler og responser som eksponeres av tjenesten Vigo Skole."@nb ;
+    dcterms:creator "Novari" ;
+    dcterms:issued "2026-04-20"^^xsd:date ;
+    dcterms:source <https://www.digdir.no/informasjonsforvaltning/person-og-enhet-felles-informasjonsmodell/2018>,
+        <https://esco.ec.europa.eu/en/about-esco/escopedia/escopedia/european-learning-model>,
+        <https://europass.europa.eu/en/node/2675> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:comment "The ontology draws structural inspiration from Digdir's Actor/Person/Entity/Identifier model and from the European Learning Model's use of linked open data, explicit classes, relations, provenance and controlled concept schemes."@en,
+        "Ontologien henter strukturell inspirasjon fra Digdir-modellenes Aktør/Person/Enhet/Identifikator og fra European Learning Model sin bruk av lenkede data, eksplisitte klasser, relasjoner, provenance og kontrollerte begrepsskjema."@nb .
 
-vigoskole:Submission a owl:Class ;
-  rdfs:label "Submission"@en ;
-  rdfs:label "Innsending"@nb ;
-  rdfs:subClassOf prov:Activity .
+vigoskole:ApiDocument
+    a owl:Class ;
+    rdfs:label "API document"@en,
+        "API-dokument"@nb ;
+    rdfs:comment "A JSON-LD document exchanged through the Vigo Skole API."@en,
+        "Et JSON-LD-dokument som utveksles gjennom Vigo Skole API."@nb .
 
-vigoskole:GraduatingStudentsSubmission a owl:Class ;
-  rdfs:label "Graduating students submission"@en ;
-  rdfs:label "Innsending av avgangselever"@nb ;
-  rdfs:subClassOf vigoskole:Submission .
+vigoskole:RequestDocument
+    a owl:Class ;
+    rdfs:subClassOf vigoskole:ApiDocument ;
+    rdfs:label "request document"@en,
+        "forespørselsdokument"@nb .
 
-vigoskole:StudentRecord a owl:Class ;
-  rdfs:label "Student record"@en ;
-  rdfs:label "Elevoppføring"@nb ;
-  rdfs:subClassOf elm:Person ;
-  owl:equivalentClass foaf:Person .
+vigoskole:ResponseDocument
+    a owl:Class ;
+    rdfs:subClassOf vigoskole:ApiDocument ;
+    rdfs:label "response document"@en,
+        "responsdokument"@nb .
 
-vigoskole:PersonName a owl:Class ;
-  rdfs:label "Person name"@en ;
-  rdfs:label "Navn"@nb ;
-  rdfs:subClassOf schema:Person .
+vigoskole:GraduatingStudentsSubmissionRequest
+    a owl:Class ;
+    rdfs:subClassOf
+        vigoskole:RequestDocument,
+        [
+            a owl:Restriction ;
+            owl:onProperty vigoskole:hasStudent ;
+            owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+            owl:onClass vigoskole:Student
+        ] ;
+    rdfs:label "graduating students submission request"@en,
+        "forespørsel om innsending av avgangselever"@nb ;
+    rdfs:comment "Request document for submission of the complete list of graduating students for one lower secondary school in the current school year."@en,
+        "Forespørselsdokument for innsending av komplett liste over avgangselever for én ungdomsskole i inneværende skoleår."@nb .
 
-vigoskole:SchoolInfo a owl:Class ;
-  rdfs:label "School"@en ;
-  rdfs:label "Skole"@nb ;
-  rdfs:subClassOf enhet:Virksomhet .
+vigoskole:Submission
+    a owl:Class ;
+    rdfs:subClassOf
+        prov:Activity,
+        [
+            a owl:Restriction ;
+            owl:onProperty vigoskole:hasSchool ;
+            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+            owl:onClass vigoskole:School
+        ] ;
+    rdfs:label "submission"@en,
+        "innsending"@nb ;
+    rdfs:comment "A recorded submission of graduating student data, including metadata, school context and validation results."@en,
+        "En registrert innsending av data om avgangselever, med metadata, skolekontekst og valideringsresultater."@nb .
 
-vigoskole:SupplierInfo a owl:Class ;
-  rdfs:label "Supplier"@en ;
-  rdfs:label "Leverandør"@nb ;
-  rdfs:subClassOf enhet:Virksomhet .
+vigoskole:SubmissionResponse
+    a owl:Class ;
+    rdfs:subClassOf vigoskole:ResponseDocument, vigoskole:Submission ;
+    rdfs:label "submission response"@en,
+        "innsendingsrespons"@nb ;
+    rdfs:comment "Successful or persisted submission representation returned by the API."@en,
+        "Representasjon av vellykket eller lagret innsending returnert av API-et."@nb .
 
-vigoskole:ValidatedStudent a owl:Class ;
-  rdfs:label "Validated student"@en ;
-  rdfs:label "Validert elev"@nb .
+vigoskole:ErrorResponse
+    a owl:Class ;
+    rdfs:subClassOf
+        vigoskole:ResponseDocument,
+        [
+            a owl:Restriction ;
+            owl:onProperty vigoskole:aboutSubmission ;
+            owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+            owl:onClass vigoskole:Submission
+        ] ;
+    rdfs:label "error response"@en,
+        "feilrespons"@nb ;
+    rdfs:comment "Error document returned by the API for bad requests, forbidden submissions, or validation failures."@en,
+        "Feildokument returnert av API-et ved ugyldige forespørsler, forbudte innsendinger eller valideringsfeil."@nb .
 
-vigoskole:ValidationMessage a owl:Class ;
-  rdfs:label "Validation message"@en ;
-  rdfs:label "Valideringsmelding"@nb .
+vigoskole:SubmissionWindow
+    a owl:Class ;
+    rdfs:label "submission window"@en,
+        "innsendingsperiode"@nb ;
+    rdfs:comment "Configured date interval in which submission is allowed."@en,
+        "Konfigurert datointervall hvor innsending er tillatt."@nb .
 
-vigoskole:hasStudent a owl:ObjectProperty ;
-  rdfs:label "has student"@en ;
-  rdfs:label "har elev"@nb ;
-  rdfs:domain vigoskole:GraduatingStudentsSubmission ;
-  rdfs:range vigoskole:StudentRecord .
+vigoskole:Actor
+    a owl:Class ;
+    rdfs:subClassOf prov:Agent ;
+    rdfs:label "actor"@en,
+        "aktør"@nb ;
+    rdfs:comment "Actor participating in the submission process. Inspired by Digdir's Actor supertype."@en,
+        "Aktør som deltar i innsendingen. Inspirert av Digdir sin supertype Aktør."@nb .
 
-vigoskole:hasValidatedStudent a owl:ObjectProperty ;
-  rdfs:label "has validated student"@en ;
-  rdfs:label "har validert elev"@nb ;
-  rdfs:domain vigoskole:Submission ;
-  rdfs:range vigoskole:ValidatedStudent .
+vigoskole:Person
+    a owl:Class ;
+    rdfs:subClassOf vigoskole:Actor, foaf:Person ;
+    rdfs:label "person"@en,
+        "person"@nb .
 
-vigoskole:hasValidationMessage a owl:ObjectProperty ;
-  rdfs:label "has validation message"@en ;
-  rdfs:label "har valideringsmelding"@nb ;
-  rdfs:domain vigoskole:ValidatedStudent ;
-  rdfs:range vigoskole:ValidationMessage .
+vigoskole:Organisation
+    a owl:Class ;
+    rdfs:subClassOf vigoskole:Actor, foaf:Agent ;
+    rdfs:label "organisation"@en,
+        "organisasjon"@nb ;
+    rdfs:comment "Organisation-like actor identified by organisation number and name."@en,
+        "Organisasjonsaktør identifisert ved organisasjonsnummer og navn."@nb .
 
-vigoskole:submissionId a owl:DatatypeProperty ;
-  rdfs:label "submission id"@en ;
-  rdfs:label "innsending id"@nb ;
-  rdfs:domain vigoskole:Submission ;
-  rdfs:range xsd:string .
+vigoskole:School
+    a owl:Class ;
+    rdfs:subClassOf vigoskole:Organisation ;
+    rdfs:label "school"@en,
+        "skole"@nb ;
+    rdfs:comment "Lower secondary school verified against VIGO Kodeverk."@en,
+        "Ungdomsskole verifisert mot VIGO Kodeverk."@nb .
 
-vigoskole:schoolYear a owl:DatatypeProperty ;
-  rdfs:label "school year"@en ;
-  rdfs:label "skoleår"@nb ;
-  rdfs:domain vigoskole:Submission ;
-  rdfs:range xsd:string .
+vigoskole:Supplier
+    a owl:Class ;
+    rdfs:subClassOf vigoskole:Organisation ;
+    rdfs:label "supplier"@en,
+        "leverandør"@nb ;
+    rdfs:comment "Organisation submitting on behalf of a school when supplier information is present in the Maskinporten token."@en,
+        "Organisasjon som sender inn på vegne av en skole når leverandørinformasjon finnes i Maskinporten-tokenet."@nb .
 
-vigoskole:status a owl:DatatypeProperty ;
-  rdfs:label "status"@en ;
-  rdfs:label "status"@nb ;
-  rdfs:domain vigoskole:Submission ;
-  rdfs:range xsd:string .
+vigoskole:Student
+    a owl:Class ;
+    rdfs:subClassOf vigoskole:Person ;
+    rdfs:label "student"@en,
+        "elev"@nb ;
+    rdfs:comment "Student record included in the graduating students submission request."@en,
+        "Elevoppføring inkludert i forespørselen om innsending av avgangselever."@nb .
 
-vigoskole:submittedBy a owl:DatatypeProperty ;
-  rdfs:label "submitted by"@en ;
-  rdfs:label "innsendt av"@nb ;
-  rdfs:domain vigoskole:Submission ;
-  rdfs:range xsd:string .
+vigoskole:ValidatedStudent
+    a owl:Class ;
+    rdfs:label "validated student"@en,
+        "validert elev"@nb ;
+    rdfs:comment "Validation result for one submitted student line."@en,
+        "Valideringsresultat for én innsendt elevlinje."@nb .
 
-vigoskole:receivedDate a owl:DatatypeProperty ;
-  rdfs:label "received date"@en ;
-  rdfs:label "mottatt dato"@nb ;
-  rdfs:domain vigoskole:Submission ;
-  rdfs:range xsd:date .
+vigoskole:ValidationMessage
+    a owl:Class ;
+    rdfs:label "validation message"@en,
+        "valideringsmelding"@nb ;
+    rdfs:comment "Single validation error or warning tied to one field in one student record."@en,
+        "Enkelt valideringsavvik eller advarsel knyttet til ett felt i én elevoppføring."@nb .
 
-vigoskole:school a owl:ObjectProperty ;
-  rdfs:label "school"@en ;
-  rdfs:label "skole"@nb ;
-  rdfs:domain vigoskole:Submission ;
-  rdfs:range vigoskole:SchoolInfo .
+vigoskole:PersonName
+    a owl:Class ;
+    rdfs:label "person name"@en,
+        "personnavn"@nb ;
+    rdfs:comment "Structured person name with first, middle and last name. Inspired by Digdir's Personnavn model."@en,
+        "Strukturert personnavn med fornavn, mellomnavn og etternavn. Inspirert av Digdir sin modell for Personnavn."@nb .
 
-vigoskole:supplier a owl:ObjectProperty ;
-  rdfs:label "supplier"@en ;
-  rdfs:label "leverandør"@nb ;
-  rdfs:domain vigoskole:Submission ;
-  rdfs:range vigoskole:SupplierInfo .
+vigoskole:Identifier
+    a owl:Class ;
+    rdfs:label "identifier"@en,
+        "identifikator"@nb ;
+    rdfs:comment "Identifier object separating identifier value from identifier type, following the pattern described by Digdir's common information model."@en,
+        "Identifikatorobjekt som skiller identifikatorverdi fra identifikatortype, etter mønsteret i Digdir sin felles informasjonsmodell."@nb .
 
-vigoskole:classCode a owl:DatatypeProperty ;
-  rdfs:label "class code"@en ;
-  rdfs:label "klassekode"@nb ;
-  rdfs:domain vigoskole:StudentRecord ;
-  rdfs:range xsd:string .
+vigoskole:hasStudent
+    a owl:ObjectProperty ;
+    rdfs:domain vigoskole:GraduatingStudentsSubmissionRequest ;
+    rdfs:range vigoskole:Student ;
+    rdfs:label "has student"@en,
+        "har elev"@nb .
 
-vigoskole:personalIdentityNumber a owl:DatatypeProperty ;
-  rdfs:label "personal identity number"@en ;
-  rdfs:label "fødselsnummer"@nb ;
-  rdfs:domain vigoskole:StudentRecord ;
-  rdfs:range xsd:string .
+vigoskole:hasSchool
+    a owl:ObjectProperty ;
+    rdfs:domain vigoskole:Submission ;
+    rdfs:range vigoskole:School ;
+    rdfs:label "has school"@en,
+        "har skole"@nb .
 
-vigoskole:personName a owl:ObjectProperty ;
-  rdfs:label "person name"@en ;
-  rdfs:label "navn"@nb ;
-  rdfs:domain vigoskole:StudentRecord ;
-  rdfs:range vigoskole:PersonName ;
-  rdfs:subPropertyOf foaf:name .
+vigoskole:hasSupplier
+    a owl:ObjectProperty ;
+    rdfs:domain vigoskole:Submission ;
+    rdfs:range vigoskole:Supplier ;
+    rdfs:label "has supplier"@en,
+        "har leverandør"@nb .
 
-vigoskole:firstName a owl:DatatypeProperty ;
-  rdfs:label "first name"@en ;
-  rdfs:label "fornavn"@nb ;
-  rdfs:domain vigoskole:PersonName ;
-  rdfs:range xsd:string ;
-  rdfs:subPropertyOf person:fornavn , foaf:givenName .
+vigoskole:hasValidationResult
+    a owl:ObjectProperty ;
+    rdfs:domain vigoskole:Submission ;
+    rdfs:range vigoskole:ValidatedStudent ;
+    rdfs:label "has validation result"@en,
+        "har valideringsresultat"@nb .
 
-vigoskole:middleName a owl:DatatypeProperty ;
-  rdfs:label "middle name"@en ;
-  rdfs:label "mellomnavn"@nb ;
-  rdfs:domain vigoskole:PersonName ;
-  rdfs:range xsd:string ;
-  rdfs:subPropertyOf person:mellomnavn , foaf:givenName .
+vigoskole:hasValidationMessage
+    a owl:ObjectProperty ;
+    rdfs:domain vigoskole:ValidatedStudent ;
+    rdfs:range vigoskole:ValidationMessage ;
+    rdfs:label "has validation message"@en,
+        "har valideringsmelding"@nb .
 
-vigoskole:lastName a owl:DatatypeProperty ;
-  rdfs:label "last name"@en ;
-  rdfs:label "etternavn"@nb ;
-  rdfs:domain vigoskole:PersonName ;
-  rdfs:range xsd:string ;
-  rdfs:subPropertyOf person:etternavn , foaf:familyName .
+vigoskole:hasName
+    a owl:ObjectProperty ;
+    rdfs:domain vigoskole:Person ;
+    rdfs:range vigoskole:PersonName ;
+    rdfs:label "has name"@en,
+        "har navn"@nb .
 
-vigoskole:lineNumber a owl:DatatypeProperty ;
-  rdfs:label "line number"@en ;
-  rdfs:label "linjenummer"@nb ;
-  rdfs:domain vigoskole:ValidatedStudent ;
-  rdfs:range xsd:integer .
+vigoskole:hasIdentifier
+    a owl:ObjectProperty ;
+    rdfs:domain vigoskole:Actor ;
+    rdfs:range vigoskole:Identifier ;
+    rdfs:label "has identifier"@en,
+        "har identifikator"@nb .
 
-vigoskole:personalIdentityNumberStatus a owl:DatatypeProperty ;
-  rdfs:label "personal identity number status"@en ;
-  rdfs:label "fødselsnummerstatus"@nb ;
-  rdfs:domain vigoskole:ValidatedStudent ;
-  rdfs:range xsd:string .
+vigoskole:aboutSubmission
+    a owl:ObjectProperty ;
+    rdfs:domain vigoskole:ErrorResponse ;
+    rdfs:range vigoskole:Submission ;
+    rdfs:label "about submission"@en,
+        "gjelder innsending"@nb ;
+    rdfs:comment "Optional embedded submission returned together with a validation error response."@en,
+        "Valgfri innebygget innsending som returneres sammen med en valideringsfeil."@nb .
 
-vigoskole:validatedName a owl:DatatypeProperty ;
-  rdfs:label "validated name"@en ;
-  rdfs:label "valideringsnavn"@nb ;
-  rdfs:domain vigoskole:ValidatedStudent ;
-  rdfs:range xsd:string ;
-  rdfs:subPropertyOf foaf:name .
+vigoskole:submissionId
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:Submission ;
+    rdfs:range xsd:string ;
+    rdfs:label "submission id"@en,
+        "innsendingsid"@nb ;
+    rdfs:comment "UUID string identifying the stored submission."@en,
+        "UUID-streng som identifiserer den lagrede innsendingen."@nb .
 
-vigoskole:messageField a owl:DatatypeProperty ;
-  rdfs:label "field"@en ;
-  rdfs:label "felt"@nb ;
-  rdfs:domain vigoskole:ValidationMessage ;
-  rdfs:range xsd:string .
+vigoskole:schoolYear
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:Submission ;
+    rdfs:range xsd:string ;
+    rdfs:label "school year"@en,
+        "skoleår"@nb ;
+    rdfs:comment "School year expressed as a string such as 2025-2026."@en,
+        "Skoleår uttrykt som streng, for eksempel 2025-2026."@nb .
 
-vigoskole:messageCode a owl:DatatypeProperty ;
-  rdfs:label "code"@en ;
-  rdfs:label "kode"@nb ;
-  rdfs:domain vigoskole:ValidationMessage ;
-  rdfs:range xsd:string .
+vigoskole:submissionStatus
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:Submission ;
+    rdfs:range xsd:string ;
+    rdfs:label "submission status"@en,
+        "innsendingsstatus"@nb ;
+    rdfs:comment "Controlled status code serialized in the API, e.g. ACCEPTED, ACCEPTED_WITH_WARNINGS or REJECTED."@en,
+        "Kontrollert statuskode serialisert i API-et, for eksempel ACCEPTED, ACCEPTED_WITH_WARNINGS eller REJECTED."@nb .
 
-vigoskole:messageSeverity a owl:DatatypeProperty ;
-  rdfs:label "severity"@en ;
-  rdfs:label "alvorlighetsgrad"@nb ;
-  rdfs:domain vigoskole:ValidationMessage ;
-  rdfs:range xsd:string .
+vigoskole:submittedBy
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:Submission ;
+    rdfs:range xsd:string ;
+    rdfs:label "submitted by"@en,
+        "innsendt av"@nb .
 
-vigoskole:messageText a owl:DatatypeProperty ;
-  rdfs:label "message"@en ;
-  rdfs:label "melding"@nb ;
-  rdfs:domain vigoskole:ValidationMessage ;
-  rdfs:range xsd:string .
+vigoskole:receivedDate
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:SubmissionResponse ;
+    rdfs:range xsd:date ;
+    rdfs:label "received date"@en,
+        "mottatt dato"@nb ;
+    rdfs:comment "Date component exposed by the API response for the time the submission was stored."@en,
+        "Datokomponenten som eksponeres i API-responsen for tidspunktet innsendingen ble lagret."@nb .
 
-vigoskole:orgNumber a owl:DatatypeProperty ;
-  rdfs:label "organization number"@en ;
-  rdfs:label "organisasjonsnummer"@nb ;
-  rdfs:domain vigoskole:SchoolInfo , vigoskole:SupplierInfo ;
-  rdfs:range xsd:string ;
-  rdfs:subPropertyOf enhet:organisasjonsnummer .
+vigoskole:classCode
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:Student ;
+    rdfs:range xsd:string ;
+    rdfs:label "class code"@en,
+        "klassekode"@nb .
 
-vigoskole:orgName a owl:DatatypeProperty ;
-  rdfs:label "organization name"@en ;
-  rdfs:label "organisasjonsnavn"@nb ;
-  rdfs:domain vigoskole:SchoolInfo , vigoskole:SupplierInfo ;
-  rdfs:range xsd:string ;
-  rdfs:subPropertyOf enhet:navn .
+vigoskole:personalIdentityNumber
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:Student ;
+    rdfs:range xsd:string ;
+    rdfs:label "personal identity number"@en,
+        "fødselsnummer"@nb ;
+    rdfs:comment "Submitted national identity number, D-number or synthetic identity number."@en,
+        "Innsendt fødselsnummer, D-nummer eller fiktivt identitetsnummer."@nb .
 
-vigoskole:municipalityNumber a owl:DatatypeProperty ;
-  rdfs:label "municipality number"@en ;
-  rdfs:label "kommunenummer"@nb ;
-  rdfs:domain vigoskole:SchoolInfo ;
-  rdfs:range xsd:string .
+vigoskole:firstName
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:PersonName ;
+    rdfs:range xsd:string ;
+    rdfs:label "first name"@en,
+        "fornavn"@nb .
 
-vigoskole:countyNumber a owl:DatatypeProperty ;
-  rdfs:label "county number"@en ;
-  rdfs:label "fylkesnummer"@nb ;
-  rdfs:domain vigoskole:SchoolInfo ;
-  rdfs:range xsd:string .
+vigoskole:middleName
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:PersonName ;
+    rdfs:range xsd:string ;
+    rdfs:label "middle name"@en,
+        "mellomnavn"@nb .
 
-vigoskole:schoolNumber a owl:DatatypeProperty ;
-  rdfs:label "school number"@en ;
-  rdfs:label "skolenummer"@nb ;
-  rdfs:domain vigoskole:SchoolInfo ;
-  rdfs:range xsd:string .
+vigoskole:lastName
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:PersonName ;
+    rdfs:range xsd:string ;
+    rdfs:label "last name"@en,
+        "etternavn"@nb .
+
+vigoskole:fullName
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:ValidatedStudent ;
+    rdfs:range xsd:string ;
+    rdfs:label "full name"@en,
+        "fullt navn"@nb ;
+    rdfs:comment "Flattened name string exposed in validation results."@en,
+        "Flattenet navnestreng som eksponeres i valideringsresultater."@nb .
+
+vigoskole:lineNumber
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:ValidatedStudent ;
+    rdfs:range xsd:positiveInteger ;
+    rdfs:label "line number"@en,
+        "linjenummer"@nb .
+
+vigoskole:personIdentifierStatus
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:ValidatedStudent ;
+    rdfs:range xsd:string ;
+    rdfs:label "person identifier status"@en,
+        "personidentifikatorstatus"@nb ;
+    rdfs:comment "Controlled display label returned by the API for one student's identity number classification."@en,
+        "Kontrollert visningsetikett returnert av API-et for klassifisering av én elevs identitetsnummer."@nb .
+
+vigoskole:validationField
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:ValidationMessage ;
+    rdfs:range xsd:string ;
+    rdfs:label "validation field"@en,
+        "valideringsfelt"@nb .
+
+vigoskole:validationCode
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:ValidationMessage ;
+    rdfs:range xsd:string ;
+    rdfs:label "validation code"@en,
+        "valideringskode"@nb .
+
+vigoskole:validationSeverity
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:ValidationMessage ;
+    rdfs:range xsd:string ;
+    rdfs:label "validation severity"@en,
+        "valideringsalvorlighetsgrad"@nb ;
+    rdfs:comment "Controlled severity code such as ERROR or WARNING."@en,
+        "Kontrollert alvorlighetskode som ERROR eller WARNING."@nb .
+
+vigoskole:messageText
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:ValidationMessage ;
+    rdfs:range xsd:string ;
+    rdfs:label "message text"@en,
+        "meldingstekst"@nb .
+
+vigoskole:organisationNumber
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:Organisation ;
+    rdfs:range xsd:string ;
+    rdfs:label "organisation number"@en,
+        "organisasjonsnummer"@nb .
+
+vigoskole:organisationName
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:Organisation ;
+    rdfs:range xsd:string ;
+    rdfs:label "organisation name"@en,
+        "organisasjonsnavn"@nb .
+
+vigoskole:municipalityNumber
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:School ;
+    rdfs:range xsd:string ;
+    rdfs:label "municipality number"@en,
+        "kommunenummer"@nb .
+
+vigoskole:countyNumber
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:School ;
+    rdfs:range xsd:string ;
+    rdfs:label "county number"@en,
+        "fylkesnummer"@nb .
+
+vigoskole:schoolNumber
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:School ;
+    rdfs:range xsd:string ;
+    rdfs:label "school number"@en,
+        "skolenummer"@nb .
+
+vigoskole:identifierValue
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:Identifier ;
+    rdfs:range xsd:string ;
+    rdfs:label "identifier value"@en,
+        "identifikatorverdi"@nb ;
+    rdfs:comment "Concrete textual value of an identifier, mirroring the Digdir information model pattern."@en,
+        "Konkret tekstlig verdi for en identifikator, i tråd med mønsteret i Digdir sin informasjonsmodell."@nb .
+
+vigoskole:identifierType
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:Identifier ;
+    rdfs:range xsd:string ;
+    rdfs:label "identifier type"@en,
+        "identifikatortype"@nb ;
+    rdfs:comment "Type label for an identifier, for example organisation number, fødselsnummer, D-number or synthetic number."@en,
+        "Typebetegnelse for en identifikator, for eksempel organisasjonsnummer, fødselsnummer, D-nummer eller fiktivt nummer."@nb .
+
+vigoskole:periodStart
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:SubmissionWindow ;
+    rdfs:range xsd:date ;
+    rdfs:label "period start"@en,
+        "periodestart"@nb .
+
+vigoskole:periodEnd
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:SubmissionWindow ;
+    rdfs:range xsd:date ;
+    rdfs:label "period end"@en,
+        "periodeslutt"@nb .
+
+vigoskole:errorCode
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:ErrorResponse ;
+    rdfs:range xsd:string ;
+    rdfs:label "error code"@en,
+        "feilkode"@nb .
+
+vigoskole:errorMessage
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:ErrorResponse ;
+    rdfs:range xsd:string ;
+    rdfs:label "error message"@en,
+        "feilmelding"@nb .
+
+vigoskole:timestamp
+    a owl:DatatypeProperty ;
+    rdfs:domain vigoskole:ErrorResponse ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "timestamp"@en,
+        "tidsstempel"@nb .
+
+vigoskole:SubmissionStatusScheme
+    a skos:ConceptScheme ;
+    skos:prefLabel "Submission status scheme"@en,
+        "Begrepsskjema for innsendingsstatus"@nb .
+
+vigoskole:Accepted
+    a skos:Concept ;
+    skos:inScheme vigoskole:SubmissionStatusScheme ;
+    skos:prefLabel "accepted"@en,
+        "godkjent"@nb ;
+    skos:notation "ACCEPTED" .
+
+vigoskole:AcceptedWithWarnings
+    a skos:Concept ;
+    skos:inScheme vigoskole:SubmissionStatusScheme ;
+    skos:prefLabel "accepted with warnings"@en,
+        "godkjent med advarsler"@nb ;
+    skos:notation "ACCEPTED_WITH_WARNINGS" .
+
+vigoskole:Rejected
+    a skos:Concept ;
+    skos:inScheme vigoskole:SubmissionStatusScheme ;
+    skos:prefLabel "rejected"@en,
+        "avvist"@nb ;
+    skos:notation "REJECTED" .
+
+vigoskole:ValidationSeverityScheme
+    a skos:ConceptScheme ;
+    skos:prefLabel "Validation severity scheme"@en,
+        "Begrepsskjema for valideringsalvorlighet"@nb .
+
+vigoskole:ErrorSeverity
+    a skos:Concept ;
+    skos:inScheme vigoskole:ValidationSeverityScheme ;
+    skos:prefLabel "error"@en,
+        "feil"@nb ;
+    skos:notation "ERROR" .
+
+vigoskole:WarningSeverity
+    a skos:Concept ;
+    skos:inScheme vigoskole:ValidationSeverityScheme ;
+    skos:prefLabel "warning"@en,
+        "advarsel"@nb ;
+    skos:notation "WARNING" .
+
+vigoskole:PersonIdentifierStatusScheme
+    a skos:ConceptScheme ;
+    skos:prefLabel "Person identifier status scheme"@en,
+        "Begrepsskjema for status på personidentifikator"@nb .
+
+vigoskole:FNumberStatus
+    a skos:Concept ;
+    skos:inScheme vigoskole:PersonIdentifierStatusScheme ;
+    skos:prefLabel "national identity number"@en,
+        "fødselsnummer"@nb ;
+    skos:notation "F-nr" .
+
+vigoskole:DNumberStatus
+    a skos:Concept ;
+    skos:inScheme vigoskole:PersonIdentifierStatusScheme ;
+    skos:prefLabel "D-number"@en,
+        "D-nummer"@nb ;
+    skos:notation "D-nr" .
+
+vigoskole:SyntheticNumberStatus
+    a skos:Concept ;
+    skos:inScheme vigoskole:PersonIdentifierStatusScheme ;
+    skos:prefLabel "synthetic identity number"@en,
+        "fiktivt fødselsnummer"@nb ;
+    skos:notation "Fiktivt f-nr" .
+
+vigoskole:InvalidNumberStatus
+    a skos:Concept ;
+    skos:inScheme vigoskole:PersonIdentifierStatusScheme ;
+    skos:prefLabel "invalid identity number"@en,
+        "ugyldig identitetsnummer"@nb ;
+    skos:notation "Ugyldig" .
+
+vigoskole:ErrorCodeScheme
+    a skos:ConceptScheme ;
+    skos:prefLabel "Error code scheme"@en,
+        "Begrepsskjema for feilkoder"@nb .
+
+vigoskole:ValidationError
+    a skos:Concept ;
+    skos:inScheme vigoskole:ErrorCodeScheme ;
+    skos:prefLabel "validation error"@en,
+        "valideringsfeil"@nb ;
+    skos:notation "VALIDATION_ERROR" .
+
+vigoskole:ForbiddenError
+    a skos:Concept ;
+    skos:inScheme vigoskole:ErrorCodeScheme ;
+    skos:prefLabel "forbidden"@en,
+        "forbudt"@nb ;
+    skos:notation "FORBIDDEN" .
+
+vigoskole:BadRequestError
+    a skos:Concept ;
+    skos:inScheme vigoskole:ErrorCodeScheme ;
+    skos:prefLabel "bad request"@en,
+        "ugyldig forespørsel"@nb ;
+    skos:notation "BAD_REQUEST" .
