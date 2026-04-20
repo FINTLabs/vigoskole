@@ -4,6 +4,11 @@ plugins {
     id("com.diffplug.spotless") version "8.4.0"
 }
 
+val spotlessRatchetRef =
+    providers
+        .gradleProperty("spotlessRatchetFrom")
+        .orElse("origin/main")
+
 group = "no.novari"
 version = "0.1.0-SNAPSHOT"
 
@@ -54,6 +59,9 @@ tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootTestRun") {
 
 spotless {
     java {
+        spotlessRatchetRef.orNull
+            ?.takeIf(String::isNotBlank)
+            ?.let(::ratchetFrom)
         googleJavaFormat("1.31.0")
         target("src/*/java/**/*.java")
         importOrder()
@@ -61,4 +69,10 @@ spotless {
         trimTrailingWhitespace()
         endWithNewline()
     }
+}
+
+tasks.register("format") {
+    group = "formatting"
+    description = "Formats changed Java source files with Spotless."
+    dependsOn("spotlessApply")
 }
