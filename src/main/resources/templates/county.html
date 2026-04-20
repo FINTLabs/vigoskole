@@ -2,7 +2,11 @@
 <html lang="no" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="'Fylke ' + ${countyNumber} + ' · ' + ${countyName}">Fylke</title>
+    <link rel="icon" href="https://novari.no/wp-content/uploads/2024/10/cropped-novari_favicon-32x32.png" sizes="32x32">
+    <link rel="icon" href="https://novari.no/wp-content/uploads/2024/10/cropped-novari_favicon-192x192.png" sizes="192x192">
+    <link rel="apple-touch-icon" href="https://novari.no/wp-content/uploads/2024/10/cropped-novari_favicon-180x180.png">
     <link rel="stylesheet" th:href="@{/app.css}">
 </head>
 <body>
@@ -21,6 +25,14 @@
             <p class="subtitle">Ungdomsskoler og innsendingstatus.</p>
         </div>
         <span class="muted" th:text="${userDisplayName}">bruker</span>
+    </section>
+
+    <section class="card stack">
+        <h2>Slett innsendinger for fylke</h2>
+        <form th:action="@{/ui/school-years/{schoolYear}/counties/{countyNumber}/delete(schoolYear=${schoolYear},countyNumber=${countyNumber})}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button class="danger" type="submit">Slett alle innsendinger for fylket</button>
+        </form>
     </section>
 
     <section class="card">

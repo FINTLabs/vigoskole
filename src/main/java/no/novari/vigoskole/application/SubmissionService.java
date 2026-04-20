@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import no.novari.vigoskole.domain.model.SchoolInfo;
+import no.novari.vigoskole.domain.model.SchoolYearConfiguration;
 import no.novari.vigoskole.domain.model.StudentRecord;
 import no.novari.vigoskole.domain.model.Submission;
 import no.novari.vigoskole.domain.model.SubmissionWindow;
@@ -19,19 +20,19 @@ import org.springframework.stereotype.Service;
 public class SubmissionService {
 
   private final SubmissionRepository submissionRepository;
-  private final SubmissionWindowRepository submissionWindowRepository;
+  private final SchoolYearRepository schoolYearRepository;
   private final SchoolDirectoryPort schoolDirectoryPort;
   private final PersonIdentityNumberValidator identityNumberValidator;
   private final Clock clock;
 
   public SubmissionService(
       SubmissionRepository submissionRepository,
-      SubmissionWindowRepository submissionWindowRepository,
+      SchoolYearRepository schoolYearRepository,
       SchoolDirectoryPort schoolDirectoryPort,
       PersonIdentityNumberValidator identityNumberValidator,
       Clock clock) {
     this.submissionRepository = submissionRepository;
-    this.submissionWindowRepository = submissionWindowRepository;
+    this.schoolYearRepository = schoolYearRepository;
     this.schoolDirectoryPort = schoolDirectoryPort;
     this.identityNumberValidator = identityNumberValidator;
     this.clock = clock;
@@ -39,8 +40,16 @@ public class SubmissionService {
 
   public Submission submitGraduatingStudents(
       List<StudentRecord> students, SubmitterContext submitterContext) {
-    SubmissionWindow submissionWindow = submissionWindowRepository.get();
     LocalDate today = LocalDate.now(clock);
+    String schoolYear = currentSchoolYear(today);
+    SchoolYearConfiguration schoolYearConfiguration =
+        schoolYearRepository
+            .findBySchoolYear(schoolYear)
+            .orElseThrow(
+                () ->
+                    new SchoolYearNotFoundException("Skoleåret er ikke opprettet for innsending."));
+    SubmissionWindow submissionWindow =
+        schoolYearConfiguration.submissionWindow(Submission.Type.GRADUATING_STUDENTS);
     if (!submissionWindow.includes(today)) {
       throw new SubmissionWindowClosedException(
           "Innsending er kun tillatt innenfor konfigurert periode.");
@@ -54,7 +63,6 @@ public class SubmissionService {
     }
 
     SchoolInfo school = verifySchool(submitterContext.orgNumber());
-    String schoolYear = currentSchoolYear(today);
     if (submissionRepository.existsAcceptedSubmission(
         schoolYear, school.orgNumber(), Submission.Type.GRADUATING_STUDENTS)) {
       throw new DuplicateSubmissionException(

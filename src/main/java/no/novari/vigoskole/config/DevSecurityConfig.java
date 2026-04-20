@@ -14,6 +14,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -45,7 +46,8 @@ public class DevSecurityConfig {
                     .anyRequest()
                     .denyAll())
         .csrf(AbstractHttpConfigurer::disable)
-        .oauth2ResourceServer(resourceServer -> resourceServer.jwt(Customizer.withDefaults()));
+        .oauth2ResourceServer(resourceServer -> resourceServer.jwt(Customizer.withDefaults()))
+        .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::deny));
     return http.build();
   }
 
@@ -59,8 +61,17 @@ public class DevSecurityConfig {
                     .permitAll()
                     .anyRequest()
                     .authenticated())
-        .formLogin(formLogin -> formLogin.defaultSuccessUrl("/ui/school-years", true))
-        .logout(logout -> logout.logoutSuccessUrl("/login?logout"));
+        .formLogin(
+            formLogin ->
+                formLogin
+                    .loginPage("/login")
+                    .defaultSuccessUrl("/ui/school-years", true)
+                    .permitAll())
+        .logout(logout -> logout.logoutSuccessUrl("/login?logout"))
+        .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::deny))
+        .addFilterAfter(
+            new ContentSecurityPolicyFilter(),
+            org.springframework.security.web.context.SecurityContextHolderFilter.class);
     return http.build();
   }
 

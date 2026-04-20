@@ -4,8 +4,11 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import no.novari.vigoskole.domain.model.SchoolInfo;
+import no.novari.vigoskole.domain.model.SchoolYearConfiguration;
 import no.novari.vigoskole.domain.model.StudentRecord;
 import no.novari.vigoskole.domain.model.Submission;
+import no.novari.vigoskole.domain.model.SubmissionWindow;
+import no.novari.vigoskole.domain.model.SubmissionWindows;
 import no.novari.vigoskole.domain.model.SupplierInfo;
 import no.novari.vigoskole.domain.model.ValidatedStudent;
 import no.novari.vigoskole.domain.model.ValidationMessage;
@@ -31,6 +34,20 @@ public final class TestData {
 
   public static SchoolInfo schoolInfo() {
     return new SchoolInfo(SCHOOL_ORG_NUMBER, "Ås ungdomsskole", "3218", "32", "1540");
+  }
+
+  public static SubmissionWindows submissionWindows() {
+    return new SubmissionWindows(
+        new SubmissionWindow(
+            java.time.LocalDate.of(2026, 1, 1), java.time.LocalDate.of(2026, 12, 31)),
+        new SubmissionWindow(
+            java.time.LocalDate.of(2026, 5, 1), java.time.LocalDate.of(2026, 6, 30)),
+        new SubmissionWindow(
+            java.time.LocalDate.of(2026, 6, 1), java.time.LocalDate.of(2026, 7, 15)));
+  }
+
+  public static SchoolYearConfiguration schoolYearConfiguration() {
+    return new SchoolYearConfiguration("2025-2026", submissionWindows());
   }
 
   public static Submission submission(Submission.Status status) {

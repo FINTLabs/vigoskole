@@ -2,7 +2,11 @@
 <html lang="no" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="'Vigo Skole - ' + ${schoolYear}">Vigo Skole</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="'Fake Vigo Skole - ' + ${schoolYear}">Fake Vigo Skole</title>
+    <link rel="icon" href="https://novari.no/wp-content/uploads/2024/10/cropped-novari_favicon-32x32.png" sizes="32x32">
+    <link rel="icon" href="https://novari.no/wp-content/uploads/2024/10/cropped-novari_favicon-192x192.png" sizes="192x192">
+    <link rel="apple-touch-icon" href="https://novari.no/wp-content/uploads/2024/10/cropped-novari_favicon-180x180.png">
     <link rel="stylesheet" th:href="@{/app.css}">
 </head>
 <body>
@@ -16,9 +20,12 @@
     <section class="topbar">
         <div>
             <h1 class="title" th:text="${schoolYear}">2025-2026</h1>
-            <p class="subtitle">Fylkeskommuner med innsendinger i valgt skoleår.</p>
+            <p class="subtitle">Fylkeskommuner og innsendinger for valgt skoleår.</p>
         </div>
-        <span class="muted" th:text="${userDisplayName}">bruker</span>
+        <div class="actions">
+            <a class="button-link secondary" th:href="@{/ui/school-years/{schoolYear}/edit(schoolYear=${schoolYear})}">Rediger skoleår</a>
+            <span class="muted" th:text="${userDisplayName}">bruker</span>
+        </div>
     </section>
 
     <section class="card">

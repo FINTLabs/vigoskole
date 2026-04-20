@@ -7,8 +7,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app")
 public record AppProperties(
     Path storageDirectory,
-    SubmissionWindowProperties submissionWindow,
+    SubmissionWindowsProperties submissionWindows,
     VigoKodeverkProperties vigoKodeverk) {
+
+  public record SubmissionWindowsProperties(
+      SubmissionWindowProperties graduatingStudents,
+      SubmissionWindowProperties finalGrades,
+      SubmissionWindowProperties examGrades) {}
 
   public record SubmissionWindowProperties(LocalDate from, LocalDate to) {}
 

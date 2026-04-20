@@ -24,7 +24,19 @@ public record Submission(
   }
 
   public enum Type {
-    GRADUATING_STUDENTS
+    GRADUATING_STUDENTS("Liste over avgangselever"),
+    FINAL_GRADES("Standpunktkarakterer"),
+    EXAM_GRADES("Eksamenskarakterer");
+
+    private final String displayName;
+
+    Type(String displayName) {
+      this.displayName = displayName;
+    }
+
+    public String displayName() {
+      return displayName;
+    }
   }
 
   public enum Status {

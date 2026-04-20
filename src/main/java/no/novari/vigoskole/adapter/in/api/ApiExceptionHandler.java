@@ -3,6 +3,7 @@ package no.novari.vigoskole.adapter.in.api;
 import java.time.LocalDateTime;
 import no.novari.vigoskole.application.DuplicateSubmissionException;
 import no.novari.vigoskole.application.SchoolVerificationException;
+import no.novari.vigoskole.application.SchoolYearNotFoundException;
 import no.novari.vigoskole.application.SubmissionRejectedException;
 import no.novari.vigoskole.application.SubmissionWindowClosedException;
 import org.springframework.http.HttpStatus;
@@ -36,7 +37,8 @@ public class ApiExceptionHandler {
   @ExceptionHandler({
     DuplicateSubmissionException.class,
     SubmissionWindowClosedException.class,
-    SchoolVerificationException.class
+    SchoolVerificationException.class,
+    SchoolYearNotFoundException.class
   })
   ResponseEntity<String> handleForbidden(RuntimeException exception) {
     return ResponseEntity.status(HttpStatus.FORBIDDEN)

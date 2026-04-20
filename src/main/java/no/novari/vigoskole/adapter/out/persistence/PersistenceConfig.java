@@ -3,7 +3,6 @@ package no.novari.vigoskole.adapter.out.persistence;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import no.novari.vigoskole.config.AppProperties;
-import no.novari.vigoskole.domain.model.SubmissionWindow;
 import org.eclipse.store.storage.embedded.types.EmbeddedStorage;
 import org.eclipse.store.storage.embedded.types.EmbeddedStorageManager;
 import org.springframework.context.annotation.Bean;
@@ -20,11 +19,8 @@ public class PersistenceConfig {
   }
 
   @Bean
-  EclipseStoreState eclipseStoreState(AppProperties appProperties) {
-    SubmissionWindow defaultWindow =
-        new SubmissionWindow(
-            appProperties.submissionWindow().from(), appProperties.submissionWindow().to());
-    return new EclipseStoreState(defaultWindow);
+  EclipseStoreState eclipseStoreState() {
+    return new EclipseStoreState();
   }
 
   @Bean
@@ -32,11 +28,8 @@ public class PersistenceConfig {
       EmbeddedStorageManager embeddedStorageManager,
       EclipseStoreState state,
       AppProperties appProperties) {
-    SubmissionWindow defaultWindow =
-        new SubmissionWindow(
-            appProperties.submissionWindow().from(), appProperties.submissionWindow().to());
     return new EclipseStoreInitializer(
-        embeddedStorageManager, state, appProperties.storageDirectory(), defaultWindow);
+        embeddedStorageManager, state, appProperties.storageDirectory());
   }
 
   static final class EclipseStoreInitializer {
@@ -44,26 +37,16 @@ public class PersistenceConfig {
     EclipseStoreInitializer(
         EmbeddedStorageManager embeddedStorageManager,
         EclipseStoreState state,
-        Path storageDirectory,
-        SubmissionWindow defaultWindow) {
+        Path storageDirectory) {
       try {
         Files.createDirectories(storageDirectory);
         Object root = embeddedStorageManager.root();
         EclipseStoreState rootState;
-        boolean updated = false;
         if (root instanceof EclipseStoreState loadedState) {
           rootState = loadedState;
         } else {
           rootState = state;
           embeddedStorageManager.setRoot(state);
-          updated = true;
-        }
-        SubmissionWindow existing = rootState.submissionWindow();
-        if (existing == null || existing.from() == null || existing.to() == null) {
-          rootState.submissionWindow(defaultWindow);
-          updated = true;
-        }
-        if (updated) {
           embeddedStorageManager.storeRoot();
         }
       } catch (java.io.IOException exception) {

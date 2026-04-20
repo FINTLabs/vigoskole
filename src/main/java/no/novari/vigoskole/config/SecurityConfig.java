@@ -20,6 +20,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
@@ -57,7 +58,8 @@ public class SecurityConfig {
                     .anyRequest()
                     .denyAll())
         .csrf(AbstractHttpConfigurer::disable)
-        .oauth2ResourceServer(resourceServer -> resourceServer.jwt(Customizer.withDefaults()));
+        .oauth2ResourceServer(resourceServer -> resourceServer.jwt(Customizer.withDefaults()))
+        .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::deny));
     return http.build();
   }
 
@@ -67,12 +69,16 @@ public class SecurityConfig {
     http.authorizeHttpRequests(
             authorize ->
                 authorize
-                    .requestMatchers("/actuator/health", "/app.css", "/")
+                    .requestMatchers("/actuator/health", "/app.css", "/", "/login")
                     .permitAll()
                     .anyRequest()
                     .authenticated())
-        .oauth2Login(Customizer.withDefaults())
-        .logout(logout -> logout.logoutSuccessUrl("/"));
+        .oauth2Login(oauth2Login -> oauth2Login.loginPage("/login"))
+        .logout(logout -> logout.logoutSuccessUrl("/"))
+        .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::deny))
+        .addFilterAfter(
+            new ContentSecurityPolicyFilter(),
+            org.springframework.security.web.context.SecurityContextHolderFilter.class);
     return http.build();
   }
 

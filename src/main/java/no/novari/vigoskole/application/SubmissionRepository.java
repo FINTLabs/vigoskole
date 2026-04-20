@@ -14,4 +14,12 @@ public interface SubmissionRepository {
   List<Submission> findAll();
 
   Optional<Submission> findById(UUID id);
+
+  void deleteById(UUID id);
+
+  void deleteBySchoolYear(String schoolYear);
+
+  void deleteBySchoolYearAndCountyNumber(String schoolYear, String countyNumber);
+
+  void deleteBySchoolYearAndSchoolOrgNumber(String schoolYear, String schoolOrgNumber);
 }

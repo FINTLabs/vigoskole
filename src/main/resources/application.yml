@@ -1,6 +1,8 @@
 spring:
   application:
     name: vigoskole
+  web:
+    locale: nb_NO
   mvc:
     contentnegotiation:
       favor-parameter: false
@@ -12,6 +14,7 @@ spring:
       enabled: true
   thymeleaf:
     cache: false
+    encoding: UTF-8
   jackson:
     serialization:
       indent-output: true
@@ -38,6 +41,13 @@ spring:
         jwt:
           jwk-set-uri: ${MASKINPORTEN_JWK_SET_URI:https://maskinporten.no/jwk}
 
+server:
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
 management:
   endpoints:
     web:
@@ -58,8 +68,15 @@ app:
     expected-scope: ${MASKINPORTEN_SCOPE:novari:fakevigoskole}
     jwk-cache-duration: ${MASKINPORTEN_JWK_CACHE_DURATION:PT24H}
   storage-directory: .data/eclipsestore
-  submission-window:
-    from: 2026-01-02
-    to: 2026-05-31
+  submission-windows:
+    graduating-students:
+      from: 2026-01-02
+      to: 2026-05-31
+    final-grades:
+      from: 2026-05-15
+      to: 2026-06-20
+    exam-grades:
+      from: 2026-06-01
+      to: 2026-06-30
   vigo-kodeverk:
     base-url: https://kodeverk.vigo.no

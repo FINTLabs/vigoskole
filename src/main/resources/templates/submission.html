@@ -2,7 +2,11 @@
 <html lang="no" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Innsending</title>
+    <link rel="icon" href="https://novari.no/wp-content/uploads/2024/10/cropped-novari_favicon-32x32.png" sizes="32x32">
+    <link rel="icon" href="https://novari.no/wp-content/uploads/2024/10/cropped-novari_favicon-192x192.png" sizes="192x192">
+    <link rel="apple-touch-icon" href="https://novari.no/wp-content/uploads/2024/10/cropped-novari_favicon-180x180.png">
     <link rel="stylesheet" th:href="@{/app.css}">
 </head>
 <body>
@@ -29,10 +33,19 @@
         <span class="muted" th:text="${userDisplayName}">bruker</span>
     </section>
 
+    <section class="card stack">
+        <h2>Slett innsending</h2>
+        <form th:action="@{/ui/submissions/{submissionId}/delete(submissionId=${submission.id()})}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button class="danger" type="submit">Slett denne innsendingen</button>
+        </form>
+    </section>
+
     <section class="grid two">
         <article class="card stack">
             <h2>Metadata</h2>
             <div class="stack">
+                <div><strong>Type:</strong> <span th:text="${submission.type().displayName()}">Liste over avgangselever</span></div>
                 <div><strong>Status:</strong> <span class="badge" th:classappend="${submission.status()}" th:text="${submission.status()}">ACCEPTED</span></div>
                 <div><strong>Skoleår:</strong> <span th:text="${submission.schoolYear()}">2025-2026</span></div>
                 <div><strong>Innsendt:</strong> <span th:text="${#temporals.format(submission.submittedAt().atZone(T(java.time.ZoneId).systemDefault()), 'dd/MM/yyyy HH:mm')}">16/04/2026 12:15</span></div>

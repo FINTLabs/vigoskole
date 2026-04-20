@@ -1,4 +1,14 @@
 app:
+  submission-windows:
+    graduating-students:
+      from: 2026-01-02
+      to: 2026-05-31
+    final-grades:
+      from: 2026-05-15
+      to: 2026-06-20
+    exam-grades:
+      from: 2026-06-01
+      to: 2026-06-30
   dev:
     user:
       username: ${DEV_WEB_USERNAME:dev}

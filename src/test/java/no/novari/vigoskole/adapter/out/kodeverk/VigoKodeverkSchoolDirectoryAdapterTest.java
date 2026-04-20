@@ -49,8 +49,13 @@ class VigoKodeverkSchoolDirectoryAdapterTest {
         new ObjectMapper(),
         new AppProperties(
             Path.of(".data/eclipsestore"),
-            new AppProperties.SubmissionWindowProperties(
-                java.time.LocalDate.of(2026, 1, 1), java.time.LocalDate.of(2026, 12, 31)),
+            new AppProperties.SubmissionWindowsProperties(
+                new AppProperties.SubmissionWindowProperties(
+                    java.time.LocalDate.of(2026, 1, 1), java.time.LocalDate.of(2026, 12, 31)),
+                new AppProperties.SubmissionWindowProperties(
+                    java.time.LocalDate.of(2026, 5, 1), java.time.LocalDate.of(2026, 6, 30)),
+                new AppProperties.SubmissionWindowProperties(
+                    java.time.LocalDate.of(2026, 6, 1), java.time.LocalDate.of(2026, 7, 15))),
             new AppProperties.VigoKodeverkProperties("https://kodeverk.vigo.no")));
   }
 }

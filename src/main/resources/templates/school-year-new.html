@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="no" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Opprett skoleår</title>
+    <link rel="icon" href="https://novari.no/wp-content/uploads/2024/10/cropped-novari_favicon-32x32.png" sizes="32x32">
+    <link rel="icon" href="https://novari.no/wp-content/uploads/2024/10/cropped-novari_favicon-192x192.png" sizes="192x192">
+    <link rel="apple-touch-icon" href="https://novari.no/wp-content/uploads/2024/10/cropped-novari_favicon-180x180.png">
+    <link rel="stylesheet" th:href="@{/app.css}">
+</head>
+<body>
+<main class="page stack">
+    <div class="breadcrumbs">
+        <a th:href="@{/ui/school-years}">Skoleår</a>
+        <span>/</span>
+        <span th:text="${pageTitle}">Opprett skoleår</span>
+    </div>
+
+    <section class="topbar">
+        <div>
+            <h1 class="title" th:text="${pageTitle}">Opprett skoleår</h1>
+            <p class="subtitle" th:text="${pageSubtitle}">Sett opp et nytt skoleår og konfigurer innsendingsvinduer for hver type innsending.</p>
+        </div>
+        <span class="muted" th:text="${userDisplayName}">bruker</span>
+    </section>
+
+    <section class="card stack">
+        <form class="stack" th:action="${formAction}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+            <label class="field-single">
+                <span th:text="${schoolYearTitle}">Skoleår</span>
+                <input type="text"
+                       name="schoolYear"
+                       placeholder="2026-2027"
+                       th:value="${schoolYearValue}"
+                       th:readonly="${schoolYearReadonly}">
+            </label>
+
+            <div class="window-groups">
+                <section class="window-group stack">
+                    <h2>Liste over avgangselever</h2>
+                    <div class="form-grid">
+                        <label>Fra
+                            <input type="date" name="graduatingStudentsFrom" th:value="${windowForm.graduatingStudentsFrom()}">
+                        </label>
+                        <label>Til
+                            <input type="date" name="graduatingStudentsTo" th:value="${windowForm.graduatingStudentsTo()}">
+                        </label>
+                    </div>
+                </section>
+
+                <section class="window-group stack">
+                    <h2>Standpunktkarakterer</h2>
+                    <div class="form-grid">
+                        <label>Fra
+                            <input type="date" name="finalGradesFrom" th:value="${windowForm.finalGradesFrom()}">
+                        </label>
+                        <label>Til
+                            <input type="date" name="finalGradesTo" th:value="${windowForm.finalGradesTo()}">
+                        </label>
+                    </div>
+                </section>
+
+                <section class="window-group stack">
+                    <h2>Eksamenskarakterer</h2>
+                    <div class="form-grid">
+                        <label>Fra
+                            <input type="date" name="examGradesFrom" th:value="${windowForm.examGradesFrom()}">
+                        </label>
+                        <label>Til
+                            <input type="date" name="examGradesTo" th:value="${windowForm.examGradesTo()}">
+                        </label>
+                    </div>
+                </section>
+            </div>
+
+            <div class="actions">
+                <button type="submit" th:text="${submitLabel}">Opprett skoleår</button>
+                <a class="button-link secondary" th:href="${cancelHref}" th:text="${cancelLabel}">Avbryt</a>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

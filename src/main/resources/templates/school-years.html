@@ -2,51 +2,47 @@
 <html lang="no" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Vigo Skole</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Fake Vigo Skole</title>
+    <link rel="icon" href="https://novari.no/wp-content/uploads/2024/10/cropped-novari_favicon-32x32.png" sizes="32x32">
+    <link rel="icon" href="https://novari.no/wp-content/uploads/2024/10/cropped-novari_favicon-192x192.png" sizes="192x192">
+    <link rel="apple-touch-icon" href="https://novari.no/wp-content/uploads/2024/10/cropped-novari_favicon-180x180.png">
     <link rel="stylesheet" th:href="@{/app.css}">
 </head>
 <body>
 <main class="page stack">
     <section class="topbar">
-        <div>
-            <h1 class="title">Vigo Skole</h1>
+        <div class="brand-header">
+            <img class="brand-logo"
+                 src="https://novari.no/wp-content/uploads/2024/10/novari_logo_primaer.svg"
+                 alt="Novari">
+            <h1 class="title">Fake Vigo Skole</h1>
             <p class="subtitle">Inspeksjon av opplastninger og valideringsresultater for avgangselever.</p>
         </div>
         <div class="user-panel">
             <span class="muted" th:text="${userDisplayName}">bruker</span>
             <form th:action="@{/logout}" method="post">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                <button type="submit">Logg ut</button>
+                <button class="secondary" type="submit">Logg ut</button>
             </form>
         </div>
     </section>
 
     <section class="card stack">
-        <h2>Innsendingsperiode</h2>
-        <p>
-            Nåværende konfigurert periode:
-            <strong th:text="${#temporals.format(submissionWindow.from(), 'dd/MM/yyyy')}">01/01/2026</strong>
-            til
-            <strong th:text="${#temporals.format(submissionWindow.to(), 'dd/MM/yyyy')}">31/12/2026</strong>
-        </p>
-        <form class="form-grid" th:action="@{/ui/submission-window}" method="post">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <label>Fra
-                <input type="date" name="from" th:value="${submissionWindow.from()}">
-            </label>
-            <label>Til
-                <input type="date" name="to" th:value="${submissionWindow.to()}">
-            </label>
-            <button type="submit">Oppdater periode</button>
-        </form>
-    </section>
+        <div class="section-header">
+            <div>
+                <h2>Innsendinger for skoleår</h2>
+                <p class="muted">Opprett og administrer skoleår for innsendinger og innsendingsvinduer.</p>
+            </div>
+            <a class="button-link" th:href="@{/ui/school-years/new}">Opprett skoleår</a>
+        </div>
 
-    <section class="card" th:if="${!#lists.isEmpty(schoolYears)}">
-        <table class="table">
+        <table class="table" th:if="${!#lists.isEmpty(schoolYears)}">
             <thead>
             <tr>
                 <th>Skoleår</th>
                 <th>Innsendinger</th>
+                <th>Handling</th>
             </tr>
             </thead>
             <tbody>
@@ -56,13 +52,22 @@
                        th:text="${schoolYear.schoolYear()}">2025-2026</a>
                 </td>
                 <td th:text="${schoolYear.submissions()}">0</td>
+                <td>
+                    <div class="actions">
+                        <a class="button-link secondary" th:href="@{/ui/school-years/{schoolYear}/edit(schoolYear=${schoolYear.schoolYear()})}">Rediger</a>
+                        <form th:action="@{/ui/school-years/{schoolYear}/delete(schoolYear=${schoolYear.schoolYear()})}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button class="danger" type="submit">Slett skoleår</button>
+                        </form>
+                    </div>
+                </td>
             </tr>
             </tbody>
         </table>
-    </section>
-    <section class="card" th:if="${#lists.isEmpty(schoolYears)}">
-        <h2>Ingen innsendinger ennå</h2>
-        <p class="muted">Når API-et mottar opplastninger, blir de tilgjengelige her.</p>
+
+        <p class="muted" th:if="${#lists.isEmpty(schoolYears)}">
+            Ingen skoleår er opprettet ennå.
+        </p>
     </section>
 </main>
 </body>

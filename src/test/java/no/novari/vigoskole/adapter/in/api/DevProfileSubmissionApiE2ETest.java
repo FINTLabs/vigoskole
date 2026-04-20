@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import no.novari.vigoskole.TestData;
+import no.novari.vigoskole.application.SchoolYearRepository;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +37,9 @@ class DevProfileSubmissionApiE2ETest {
 
   @LocalServerPort private int port;
 
+  @org.springframework.beans.factory.annotation.Autowired
+  private SchoolYearRepository schoolYearRepository;
+
   @BeforeAll
   static void setUp() throws IOException {
     ensureInfrastructure();
@@ -46,6 +50,7 @@ class DevProfileSubmissionApiE2ETest {
     queuedResponses.clear();
     lastKodeverkRequestMethod = null;
     lastKodeverkRequestPath = null;
+    schoolYearRepository.save(TestData.schoolYearConfiguration());
   }
 
   @AfterAll

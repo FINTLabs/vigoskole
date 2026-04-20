@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="no" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Fake Vigo Skole</title>
+    <link rel="icon" href="https://novari.no/wp-content/uploads/2024/10/cropped-novari_favicon-32x32.png" sizes="32x32">
+    <link rel="icon" href="https://novari.no/wp-content/uploads/2024/10/cropped-novari_favicon-192x192.png" sizes="192x192">
+    <link rel="apple-touch-icon" href="https://novari.no/wp-content/uploads/2024/10/cropped-novari_favicon-180x180.png">
+    <link rel="stylesheet" th:href="@{/app.css}">
+</head>
+<body>
+<main class="page stack">
+    <section class="hero">
+        <article class="card stack">
+            <img class="brand-logo"
+                 src="https://novari.no/wp-content/uploads/2024/10/novari_logo_primaer.svg"
+                 alt="Novari">
+            <div class="stack">
+                <h1 class="title">Fake Vigo Skole</h1>
+                <p class="subtitle">Demotjeneste for innsending, validering og inspeksjon av data om avgangselever fra ungdomsskoler til Vigo.</p>
+            </div>
+            <p>Tjenesten viser hvordan et API for Vigo Skole kan fungere, med Maskinporten-beskyttet innsending og en webapp for innsyn i opplastninger og valideringsresultater.</p>
+            <div class="actions">
+                <a class="button-link" th:if="${authenticated}" th:href="@{/ui/school-years}">Gå til skoleår</a>
+                <a class="button-link" th:unless="${authenticated}" th:href="@{/login}">Logg inn</a>
+            </div>
+        </article>
+        <article class="card stack">
+            <h2>Hva systemet gjør</h2>
+            <p>API-et tar imot JSON-LD for avgangselever, verifiserer avsender mot VIGO Kodeverk og godkjenner bare innsendinger som er uten feil.</p>
+            <p>Webappen lar fylkeskommune-brukere følge skoleår, fylker, ungdomsskoler og enkeltinnsendinger med tilhørende metadata og valideringsresultater.</p>
+        </article>
+    </section>
+</main>
+</body>
+</html>

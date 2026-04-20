@@ -12,9 +12,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import no.novari.vigoskole.TestData;
+import no.novari.vigoskole.domain.model.SchoolInfo;
+import no.novari.vigoskole.domain.model.SchoolYearConfiguration;
 import no.novari.vigoskole.domain.model.StudentRecord;
 import no.novari.vigoskole.domain.model.Submission;
-import no.novari.vigoskole.domain.model.SubmissionWindow;
 import no.novari.vigoskole.domain.validation.PersonIdentityNumberValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,19 +23,17 @@ import org.junit.jupiter.api.Test;
 class SubmissionServiceTest {
 
   private InMemorySubmissionRepository submissionRepository;
-  private InMemorySubmissionWindowRepository submissionWindowRepository;
+  private InMemorySchoolYearRepository schoolYearRepository;
   private SubmissionService submissionService;
 
   @BeforeEach
   void setUp() {
     submissionRepository = new InMemorySubmissionRepository();
-    submissionWindowRepository =
-        new InMemorySubmissionWindowRepository(
-            new SubmissionWindow(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31)));
+    schoolYearRepository = new InMemorySchoolYearRepository(TestData.schoolYearConfiguration());
     submissionService =
         new SubmissionService(
             submissionRepository,
-            submissionWindowRepository,
+            schoolYearRepository,
             schoolDirectoryPort(),
             new PersonIdentityNumberValidator(),
             Clock.fixed(Instant.parse("2026-04-16T10:15:30Z"), ZoneOffset.UTC));
@@ -83,14 +82,14 @@ class SubmissionServiceTest {
 
   @Test
   void shouldRejectWhenSubmissionWindowIsClosed() {
-    submissionService =
-        new SubmissionService(
-            submissionRepository,
-            new InMemorySubmissionWindowRepository(
-                new SubmissionWindow(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 31))),
-            schoolDirectoryPort(),
-            new PersonIdentityNumberValidator(),
-            Clock.fixed(Instant.parse("2026-04-16T10:15:30Z"), ZoneOffset.UTC));
+    schoolYearRepository.save(
+        new SchoolYearConfiguration(
+            "2025-2026",
+            new no.novari.vigoskole.domain.model.SubmissionWindows(
+                new no.novari.vigoskole.domain.model.SubmissionWindow(
+                    LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 31)),
+                TestData.submissionWindows().finalGrades(),
+                TestData.submissionWindows().examGrades())));
 
     assertThatThrownBy(
             () ->
@@ -100,11 +99,22 @@ class SubmissionServiceTest {
         .isInstanceOf(SubmissionWindowClosedException.class);
   }
 
+  @Test
+  void shouldRejectWhenSchoolYearIsNotCreated() {
+    schoolYearRepository.delete("2025-2026");
+
+    assertThatThrownBy(
+            () ->
+                submissionService.submitGraduatingStudents(
+                    List.of(TestData.validStudent()),
+                    new SubmitterContext(TestData.SCHOOL_ORG_NUMBER, "Test ungdomsskole", null)))
+        .isInstanceOf(SchoolYearNotFoundException.class);
+  }
+
   private SchoolDirectoryPort schoolDirectoryPort() {
     return new SchoolDirectoryPort() {
       @Override
-      public Optional<no.novari.vigoskole.domain.model.SchoolInfo> findLowerSecondarySchool(
-          String orgNumber) {
+      public Optional<SchoolInfo> findLowerSecondarySchool(String orgNumber) {
         return Optional.of(TestData.schoolInfo());
       }
 
@@ -152,19 +162,65 @@ class SubmissionServiceTest {
     public Optional<Submission> findById(UUID id) {
       return submissions.stream().filter(submission -> submission.id().equals(id)).findFirst();
     }
-  }
-
-  private record InMemorySubmissionWindowRepository(SubmissionWindow submissionWindow)
-      implements SubmissionWindowRepository {
 
     @Override
-    public SubmissionWindow get() {
-      return submissionWindow;
+    public void deleteById(UUID id) {
+      submissions.removeIf(submission -> submission.id().equals(id));
     }
 
     @Override
-    public SubmissionWindow save(SubmissionWindow submissionWindow) {
-      return submissionWindow;
+    public void deleteBySchoolYear(String schoolYear) {
+      submissions.removeIf(submission -> submission.schoolYear().equals(schoolYear));
+    }
+
+    @Override
+    public void deleteBySchoolYearAndCountyNumber(String schoolYear, String countyNumber) {
+      submissions.removeIf(
+          submission ->
+              submission.schoolYear().equals(schoolYear)
+                  && countyNumber.equals(submission.school().countyNumber()));
+    }
+
+    @Override
+    public void deleteBySchoolYearAndSchoolOrgNumber(String schoolYear, String schoolOrgNumber) {
+      submissions.removeIf(
+          submission ->
+              submission.schoolYear().equals(schoolYear)
+                  && schoolOrgNumber.equals(submission.school().orgNumber()));
+    }
+  }
+
+  private static final class InMemorySchoolYearRepository implements SchoolYearRepository {
+
+    private final List<SchoolYearConfiguration> schoolYears = new ArrayList<>();
+
+    private InMemorySchoolYearRepository(SchoolYearConfiguration schoolYearConfiguration) {
+      schoolYears.add(schoolYearConfiguration);
+    }
+
+    @Override
+    public List<SchoolYearConfiguration> findAllSchoolYears() {
+      return List.copyOf(schoolYears);
+    }
+
+    @Override
+    public Optional<SchoolYearConfiguration> findBySchoolYear(String schoolYear) {
+      return schoolYears.stream()
+          .filter(configuration -> configuration.schoolYear().equals(schoolYear))
+          .findFirst();
+    }
+
+    @Override
+    public SchoolYearConfiguration save(SchoolYearConfiguration schoolYearConfiguration) {
+      schoolYears.removeIf(
+          existing -> existing.schoolYear().equals(schoolYearConfiguration.schoolYear()));
+      schoolYears.add(schoolYearConfiguration);
+      return schoolYearConfiguration;
+    }
+
+    @Override
+    public void delete(String schoolYear) {
+      schoolYears.removeIf(configuration -> configuration.schoolYear().equals(schoolYear));
     }
   }
 }

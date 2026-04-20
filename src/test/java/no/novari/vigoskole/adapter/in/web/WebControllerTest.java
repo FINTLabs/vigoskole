@@ -14,11 +14,10 @@ import java.nio.file.Path;
 import java.util.Optional;
 import no.novari.vigoskole.TestData;
 import no.novari.vigoskole.application.SchoolDirectoryPort;
+import no.novari.vigoskole.application.SchoolYearRepository;
 import no.novari.vigoskole.application.SubmissionRepository;
-import no.novari.vigoskole.application.SubmissionWindowRepository;
 import no.novari.vigoskole.domain.model.SchoolInfo;
 import no.novari.vigoskole.domain.model.Submission;
-import no.novari.vigoskole.domain.model.SubmissionWindow;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,12 +37,11 @@ import org.springframework.web.context.WebApplicationContext;
 class WebControllerTest {
 
   @Autowired private WebApplicationContext applicationContext;
+  @Autowired private SubmissionRepository submissionRepository;
+  @Autowired private SchoolYearRepository schoolYearRepository;
 
   private MockMvc mockMvc;
   private Submission submission;
-
-  @Autowired private SubmissionRepository submissionRepository;
-  @Autowired private SubmissionWindowRepository submissionWindowRepository;
 
   @DynamicPropertySource
   static void registerProperties(DynamicPropertyRegistry registry) {
@@ -58,11 +56,156 @@ class WebControllerTest {
                 org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers
                     .springSecurity())
             .build();
-    submissionWindowRepository.save(
-        new SubmissionWindow(
-            java.time.LocalDate.of(2026, 1, 1), java.time.LocalDate.of(2026, 12, 31)));
+    schoolYearRepository.save(TestData.schoolYearConfiguration());
     submission = TestData.submission(Submission.Status.ACCEPTED_WITH_WARNINGS);
     submissionRepository.save(submission);
+  }
+
+  @Test
+  void shouldRenderSchoolYearOverview() throws Exception {
+    mockMvc
+        .perform(get("/ui/school-years").with(user("fylkesbruker")))
+        .andExpect(status().isOk())
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Fake Vigo Skole")))
+        .andExpect(
+            content().string(org.hamcrest.Matchers.containsString("Innsendinger for skoleår")))
+        .andExpect(
+            content()
+                .string(
+                    org.hamcrest.Matchers.containsString(
+                        "href=\"/ui/school-years/new\">Opprett skoleår</a>")))
+        .andExpect(
+            content()
+                .string(org.hamcrest.Matchers.containsString("cropped-novari_favicon-32x32.png")))
+        .andExpect(
+            content()
+                .string(
+                    org.hamcrest.Matchers.containsString(
+                        "<a href=\"/ui/school-years/2025-2026\">2025-2026</a>")));
+  }
+
+  @Test
+  void shouldRenderCreateSchoolYearPage() throws Exception {
+    mockMvc
+        .perform(get("/ui/school-years/new").with(user("fylkesbruker")))
+        .andExpect(status().isOk())
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Opprett skoleår")))
+        .andExpect(
+            content().string(org.hamcrest.Matchers.containsString("Liste over avgangselever")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Standpunktkarakterer")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Eksamenskarakterer")));
+  }
+
+  @Test
+  void shouldRenderEditSchoolYearPage() throws Exception {
+    mockMvc
+        .perform(get("/ui/school-years/2025-2026/edit").with(user("fylkesbruker")))
+        .andExpect(status().isOk())
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Rediger skoleår")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Lagre endringer")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("value=\"2025-2026\"")));
+  }
+
+  @Test
+  void shouldCreateSchoolYearWithConfiguredWindows() throws Exception {
+    mockMvc
+        .perform(
+            post("/ui/school-years")
+                .with(user("fylkesbruker"))
+                .with(csrf())
+                .param("schoolYear", "2026-2027")
+                .param("graduatingStudentsFrom", "2026-01-10")
+                .param("graduatingStudentsTo", "2026-05-20")
+                .param("finalGradesFrom", "2026-05-21")
+                .param("finalGradesTo", "2026-06-15")
+                .param("examGradesFrom", "2026-06-16")
+                .param("examGradesTo", "2026-07-01"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/ui/school-years"));
+
+    assert schoolYearRepository.findBySchoolYear("2026-2027").isPresent();
+  }
+
+  @Test
+  void shouldUpdateSchoolYearWindows() throws Exception {
+    mockMvc
+        .perform(
+            post("/ui/school-years/2025-2026/edit")
+                .with(user("fylkesbruker"))
+                .with(csrf())
+                .param("graduatingStudentsFrom", "2026-01-15")
+                .param("graduatingStudentsTo", "2026-05-15")
+                .param("finalGradesFrom", "2026-05-16")
+                .param("finalGradesTo", "2026-06-10")
+                .param("examGradesFrom", "2026-06-11")
+                .param("examGradesTo", "2026-06-25"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/ui/school-years/2025-2026"));
+
+    org.assertj.core.api.Assertions.assertThat(
+            schoolYearRepository
+                .findBySchoolYear("2025-2026")
+                .orElseThrow()
+                .submissionWindows()
+                .examGrades()
+                .to())
+        .isEqualTo(java.time.LocalDate.of(2026, 6, 25));
+  }
+
+  @Test
+  void shouldDeleteSubmission() throws Exception {
+    mockMvc
+        .perform(
+            post("/ui/submissions/" + submission.id() + "/delete")
+                .with(user("fylkesbruker"))
+                .with(csrf()))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(
+            redirectedUrl(
+                "/ui/school-years/2025-2026/counties/32/schools/" + TestData.SCHOOL_ORG_NUMBER));
+
+    org.assertj.core.api.Assertions.assertThat(submissionRepository.findById(submission.id()))
+        .isEmpty();
+  }
+
+  @Test
+  void shouldDeleteSchoolSubmissions() throws Exception {
+    mockMvc
+        .perform(
+            post("/ui/school-years/2025-2026/counties/32/schools/"
+                    + TestData.SCHOOL_ORG_NUMBER
+                    + "/delete")
+                .with(user("fylkesbruker"))
+                .with(csrf()))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/ui/school-years/2025-2026/counties/32"));
+
+    org.assertj.core.api.Assertions.assertThat(submissionRepository.findAll()).isEmpty();
+  }
+
+  @Test
+  void shouldDeleteCountySubmissions() throws Exception {
+    mockMvc
+        .perform(
+            post("/ui/school-years/2025-2026/counties/32/delete")
+                .with(user("fylkesbruker"))
+                .with(csrf()))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/ui/school-years/2025-2026"));
+
+    org.assertj.core.api.Assertions.assertThat(submissionRepository.findAll()).isEmpty();
+  }
+
+  @Test
+  void shouldDeleteSchoolYearAndCascadeDeleteSubmissions() throws Exception {
+    mockMvc
+        .perform(post("/ui/school-years/2025-2026/delete").with(user("fylkesbruker")).with(csrf()))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/ui/school-years"));
+
+    org.assertj.core.api.Assertions.assertThat(schoolYearRepository.findBySchoolYear("2025-2026"))
+        .isEmpty();
+    org.assertj.core.api.Assertions.assertThat(submissionRepository.findAll()).isEmpty();
   }
 
   @Test
@@ -73,34 +216,22 @@ class WebControllerTest {
         .andExpect(content().string(org.hamcrest.Matchers.containsString("Akershus")))
         .andExpect(content().string(org.hamcrest.Matchers.containsString("Ås ungdomsskole")))
         .andExpect(
-            content().string(org.hamcrest.Matchers.containsString("ACCEPTED_WITH_WARNINGS")));
+            content()
+                .string(
+                    org.hamcrest.Matchers.containsString("Slett alle innsendinger for fylket")));
   }
 
   @Test
-  void shouldRenderCountyShortNameOnSchoolYearOverview() throws Exception {
+  void shouldRenderSchoolYearManagementPage() throws Exception {
     mockMvc
         .perform(get("/ui/school-years/2025-2026").with(user("fylkesbruker")))
         .andExpect(status().isOk())
-        .andExpect(
-            content().string(org.hamcrest.Matchers.containsString("<table class=\"table\">")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Rediger skoleår")))
         .andExpect(
             content()
                 .string(
                     org.hamcrest.Matchers.containsString(
-                        "<a href=\"/ui/school-years/2025-2026/counties/32\">Akershus</a>")));
-  }
-
-  @Test
-  void shouldUpdateSubmissionWindow() throws Exception {
-    mockMvc
-        .perform(
-            post("/ui/submission-window")
-                .with(user("fylkesbruker"))
-                .with(csrf())
-                .param("from", "2026-02-01")
-                .param("to", "2026-06-01"))
-        .andExpect(status().is3xxRedirection())
-        .andExpect(redirectedUrl("/ui/school-years"));
+                        "Fylkeskommuner og innsendinger for valgt skoleår.")));
   }
 
   @Test
@@ -113,68 +244,49 @@ class WebControllerTest {
         .andExpect(content().string(org.hamcrest.Matchers.containsString("Kommune:")))
         .andExpect(content().string(org.hamcrest.Matchers.containsString("ÅS")))
         .andExpect(content().string(org.hamcrest.Matchers.containsString("Fylke:")))
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("Akershus")));
-  }
-
-  @Test
-  void shouldShowConfiguredSubmissionWindowOnOverview() throws Exception {
-    mockMvc
-        .perform(get("/ui/school-years").with(user("fylkesbruker")))
-        .andExpect(status().isOk())
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Akershus")))
         .andExpect(
-            content().string(org.hamcrest.Matchers.containsString("<table class=\"table\">")))
-        .andExpect(
-            content()
-                .string(
-                    org.hamcrest.Matchers.containsString(
-                        "<a href=\"/ui/school-years/2025-2026\">2025-2026</a>")))
-        .andExpect(
-            content()
-                .string(
-                    org.hamcrest.Matchers.not(
-                        org.hamcrest.Matchers.containsString("null innsendinger"))))
-        .andExpect(
-            content().string(org.hamcrest.Matchers.containsString("Nåværende konfigurert periode")))
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("01/01/2026")))
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("31/12/2026")));
+            content().string(org.hamcrest.Matchers.containsString("Slett denne innsendingen")));
   }
 
   @Test
   void shouldShowErrorPageWhenOneDateIsMissing() throws Exception {
     mockMvc
         .perform(
-            post("/ui/submission-window").with(user("fylkesbruker")).with(csrf()).param("from", ""))
-        .andExpect(status().isOk())
-        .andExpect(
-            content().string(org.hamcrest.Matchers.containsString("Feil i innsendingsperiode")))
-        .andExpect(
-            content()
-                .string(
-                    org.hamcrest.Matchers.containsString("startdato og sluttdato må være satt")))
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("01/01/2026")))
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("31/12/2026")));
-  }
-
-  @Test
-  void shouldShowErrorPageWhenFromDateIsAfterToDate() throws Exception {
-    mockMvc
-        .perform(
-            post("/ui/submission-window")
+            post("/ui/school-years")
                 .with(user("fylkesbruker"))
                 .with(csrf())
-                .param("from", "2026-07-01")
-                .param("to", "2026-06-01"))
+                .param("schoolYear", "2027-2028")
+                .param("graduatingStudentsFrom", "2026-01-10"))
         .andExpect(status().isOk())
         .andExpect(
-            content().string(org.hamcrest.Matchers.containsString("Feil i innsendingsperiode")))
+            content().string(org.hamcrest.Matchers.containsString("Feil i skoleårskonfigurasjon")))
         .andExpect(
             content()
-                .string(org.hamcrest.Matchers.containsString("fra-dato er satt etter til-dato")))
+                .string(org.hamcrest.Matchers.containsString("Innsendingsperiode mangler datoer.")))
         .andExpect(
             content()
                 .string(
                     org.hamcrest.Matchers.containsString(
-                        "fra-dato er lik eller tidligere enn til-dato")));
+                        "href=\"/ui/school-years/new\">Tilbake til opprettelse av skoleår</a>")));
+  }
+
+  @Test
+  void shouldShowErrorPageWhenSchoolYearIsInvalid() throws Exception {
+    mockMvc
+        .perform(
+            post("/ui/school-years")
+                .with(user("fylkesbruker"))
+                .with(csrf())
+                .param("schoolYear", "2026-2028")
+                .param("graduatingStudentsFrom", "2026-01-10")
+                .param("graduatingStudentsTo", "2026-05-20")
+                .param("finalGradesFrom", "2026-05-21")
+                .param("finalGradesTo", "2026-06-15")
+                .param("examGradesFrom", "2026-06-16")
+                .param("examGradesTo", "2026-07-01"))
+        .andExpect(status().isOk())
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Skoleår er ugyldig.")));
   }
 
   private static String newStorageDirectory() {

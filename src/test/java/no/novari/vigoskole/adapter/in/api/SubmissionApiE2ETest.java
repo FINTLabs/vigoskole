@@ -15,6 +15,7 @@ import java.util.ArrayDeque;
 import java.util.Map;
 import java.util.Queue;
 import no.novari.vigoskole.TestData;
+import no.novari.vigoskole.application.SchoolYearRepository;
 import no.novari.vigoskole.config.SecurityConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -47,6 +48,9 @@ class SubmissionApiE2ETest {
 
   @LocalServerPort private int port;
 
+  @org.springframework.beans.factory.annotation.Autowired
+  private SchoolYearRepository schoolYearRepository;
+
   @BeforeAll
   static void setUp() throws IOException {
     ensureInfrastructure();
@@ -58,6 +62,7 @@ class SubmissionApiE2ETest {
     lastKodeverkRequestBody = null;
     lastKodeverkRequestMethod = null;
     lastKodeverkRequestPath = null;
+    schoolYearRepository.save(TestData.schoolYearConfiguration());
   }
 
   @AfterAll

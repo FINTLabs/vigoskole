@@ -52,6 +52,29 @@ class DevProfileWebLoginTest {
   }
 
   @Test
+  void shouldRenderMainPageWithNovariBrandingAndUtf8() throws Exception {
+    mockMvc
+        .perform(get("/"))
+        .andExpect(status().isOk())
+        .andExpect(content().encoding("UTF-8"))
+        .andExpect(content().string(containsString("Fake Vigo Skole")))
+        .andExpect(content().string(containsString("novari_logo_primaer.svg")))
+        .andExpect(content().string(containsString("cropped-novari_favicon-32x32.png")));
+  }
+
+  @Test
+  void shouldRenderCustomLoginPageWithNovariBrandingAndUtf8() throws Exception {
+    mockMvc
+        .perform(get("/login"))
+        .andExpect(status().isOk())
+        .andExpect(content().encoding("UTF-8"))
+        .andExpect(content().string(containsString("Fake Vigo Skole")))
+        .andExpect(content().string(containsString("novari_logo_primaer.svg")))
+        .andExpect(content().string(containsString("name=\"username\"")))
+        .andExpect(content().string(containsString("cropped-novari_favicon-32x32.png")));
+  }
+
+  @Test
   void shouldAllowFormLoginWithoutOidcInDevProfile() throws Exception {
     MvcResult loginResult =
         mockMvc

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="no" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Feil i skoleårskonfigurasjon</title>
+    <link rel="icon" href="https://novari.no/wp-content/uploads/2024/10/cropped-novari_favicon-32x32.png" sizes="32x32">
+    <link rel="icon" href="https://novari.no/wp-content/uploads/2024/10/cropped-novari_favicon-192x192.png" sizes="192x192">
+    <link rel="apple-touch-icon" href="https://novari.no/wp-content/uploads/2024/10/cropped-novari_favicon-180x180.png">
+    <link rel="stylesheet" th:href="@{/app.css}">
+</head>
+<body>
+<main class="page stack">
+    <section class="topbar">
+        <div>
+            <h1 class="title">Feil i skoleårskonfigurasjon</h1>
+            <p class="subtitle">Skoleåret eller innsendingsvinduene kunne ikke lagres.</p>
+        </div>
+        <span class="muted" th:text="${userDisplayName}">bruker</span>
+    </section>
+
+    <section class="card stack">
+        <h2>Hva feilet</h2>
+        <p th:text="${errorExplanation}">Forklaring på feilen.</p>
+        <p><strong>Må korrigeres:</strong> <span th:text="${errorCorrection}">Korrigering.</span></p>
+    </section>
+
+    <section class="card stack">
+        <p><a th:href="${backHref}" th:text="${backLabel}">Tilbake</a></p>
+    </section>
+</main>
+</body>
+</html>
