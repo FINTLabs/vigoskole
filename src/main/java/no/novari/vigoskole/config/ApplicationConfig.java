@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import java.net.http.HttpClient;
 import java.time.Clock;
+import java.time.ZoneId;
 import no.novari.vigoskole.domain.validation.PersonIdentityNumberValidator;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -27,8 +28,13 @@ import org.springframework.context.annotation.Configuration;
 public class ApplicationConfig {
 
   @Bean
-  Clock clock() {
-    return Clock.systemDefaultZone();
+  ZoneId applicationZoneId() {
+    return ZoneId.of("Europe/Oslo");
+  }
+
+  @Bean
+  Clock clock(ZoneId applicationZoneId) {
+    return Clock.system(applicationZoneId);
   }
 
   @Bean

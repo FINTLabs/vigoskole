@@ -1,5 +1,6 @@
 package no.novari.vigoskole.adapter.in.web;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -66,22 +67,14 @@ class WebControllerTest {
     mockMvc
         .perform(get("/ui/school-years").with(user("fylkesbruker")))
         .andExpect(status().isOk())
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("Fake Vigo Skole")))
+        .andExpect(content().string(containsString("Fake Vigo Skole")))
+        .andExpect(content().string(containsString("Innsendinger for skoleår")))
         .andExpect(
-            content().string(org.hamcrest.Matchers.containsString("Innsendinger for skoleår")))
-        .andExpect(
-            content()
-                .string(
-                    org.hamcrest.Matchers.containsString(
-                        "href=\"/ui/school-years/new\">Opprett skoleår</a>")))
+            content().string(containsString("href=\"/ui/school-years/new\">Opprett skoleår</a>")))
+        .andExpect(content().string(containsString("cropped-novari_favicon-32x32.png")))
         .andExpect(
             content()
-                .string(org.hamcrest.Matchers.containsString("cropped-novari_favicon-32x32.png")))
-        .andExpect(
-            content()
-                .string(
-                    org.hamcrest.Matchers.containsString(
-                        "<a href=\"/ui/school-years/2025-2026\">2025-2026</a>")));
+                .string(containsString("<a href=\"/ui/school-years/2025-2026\">2025-2026</a>")));
   }
 
   @Test
@@ -89,11 +82,10 @@ class WebControllerTest {
     mockMvc
         .perform(get("/ui/school-years/new").with(user("fylkesbruker")))
         .andExpect(status().isOk())
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("Opprett skoleår")))
-        .andExpect(
-            content().string(org.hamcrest.Matchers.containsString("Liste over avgangselever")))
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("Standpunktkarakterer")))
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("Eksamenskarakterer")));
+        .andExpect(content().string(containsString("Opprett skoleår")))
+        .andExpect(content().string(containsString("Liste over avgangselever")))
+        .andExpect(content().string(containsString("Standpunktkarakterer")))
+        .andExpect(content().string(containsString("Eksamenskarakterer")));
   }
 
   @Test
@@ -101,9 +93,9 @@ class WebControllerTest {
     mockMvc
         .perform(get("/ui/school-years/2025-2026/edit").with(user("fylkesbruker")))
         .andExpect(status().isOk())
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("Rediger skoleår")))
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("Lagre endringer")))
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("value=\"2025-2026\"")));
+        .andExpect(content().string(containsString("Rediger skoleår")))
+        .andExpect(content().string(containsString("Lagre endringer")))
+        .andExpect(content().string(containsString("value=\"2025-2026\"")));
   }
 
   @Test
@@ -213,12 +205,9 @@ class WebControllerTest {
     mockMvc
         .perform(get("/ui/school-years/2025-2026/counties/32").with(user("fylkesbruker")))
         .andExpect(status().isOk())
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("Akershus")))
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("Ås ungdomsskole")))
-        .andExpect(
-            content()
-                .string(
-                    org.hamcrest.Matchers.containsString("Slett alle innsendinger for fylket")));
+        .andExpect(content().string(containsString("Akershus")))
+        .andExpect(content().string(containsString("Ås ungdomsskole")))
+        .andExpect(content().string(containsString("Slett alle innsendinger for fylket")));
   }
 
   @Test
@@ -226,12 +215,9 @@ class WebControllerTest {
     mockMvc
         .perform(get("/ui/school-years/2025-2026").with(user("fylkesbruker")))
         .andExpect(status().isOk())
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("Rediger skoleår")))
+        .andExpect(content().string(containsString("Rediger skoleår")))
         .andExpect(
-            content()
-                .string(
-                    org.hamcrest.Matchers.containsString(
-                        "Fylkeskommuner og innsendinger for valgt skoleår.")));
+            content().string(containsString("Fylkeskommuner og innsendinger for valgt skoleår.")));
   }
 
   @Test
@@ -239,14 +225,13 @@ class WebControllerTest {
     mockMvc
         .perform(get("/ui/submissions/" + submission.id()).with(user("fylkesbruker")))
         .andExpect(status().isOk())
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("16/04/2026 12:15")))
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("150491 00008")))
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("Kommune:")))
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("ÅS")))
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("Fylke:")))
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("Akershus")))
-        .andExpect(
-            content().string(org.hamcrest.Matchers.containsString("Slett denne innsendingen")));
+        .andExpect(content().string(containsString("16/04/2026 12:15")))
+        .andExpect(content().string(containsString("150491 00008")))
+        .andExpect(content().string(containsString("Kommune:")))
+        .andExpect(content().string(containsString("ÅS")))
+        .andExpect(content().string(containsString("Fylke:")))
+        .andExpect(content().string(containsString("Akershus")))
+        .andExpect(content().string(containsString("Slett denne innsendingen")));
   }
 
   @Test
@@ -259,15 +244,12 @@ class WebControllerTest {
                 .param("schoolYear", "2027-2028")
                 .param("graduatingStudentsFrom", "2026-01-10"))
         .andExpect(status().isOk())
-        .andExpect(
-            content().string(org.hamcrest.Matchers.containsString("Feil i skoleårskonfigurasjon")))
-        .andExpect(
-            content()
-                .string(org.hamcrest.Matchers.containsString("Innsendingsperiode mangler datoer.")))
+        .andExpect(content().string(containsString("Feil i skoleårskonfigurasjon")))
+        .andExpect(content().string(containsString("Innsendingsperiode mangler datoer.")))
         .andExpect(
             content()
                 .string(
-                    org.hamcrest.Matchers.containsString(
+                    containsString(
                         "href=\"/ui/school-years/new\">Tilbake til opprettelse av skoleår</a>")));
   }
 
@@ -286,7 +268,7 @@ class WebControllerTest {
                 .param("examGradesFrom", "2026-06-16")
                 .param("examGradesTo", "2026-07-01"))
         .andExpect(status().isOk())
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("Skoleår er ugyldig.")));
+        .andExpect(content().string(containsString("Skoleår er ugyldig.")));
   }
 
   private static String newStorageDirectory() {

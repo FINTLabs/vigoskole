@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import no.novari.vigoskole.application.SubmissionService;
+import no.novari.vigoskole.config.ApplicationTimeFormatter;
 import no.novari.vigoskole.config.SecurityConfig.JwtSubmitterContextResolver;
 import no.novari.vigoskole.domain.model.GraduatingStudentsSubmission;
 import no.novari.vigoskole.domain.model.StudentRecord;
@@ -36,14 +37,17 @@ public class SubmissionController {
 
   private final SubmissionService submissionService;
   private final JwtSubmitterContextResolver jwtSubmitterContextResolver;
+  private final ApplicationTimeFormatter applicationTimeFormatter;
   private final ObjectMapper objectMapper;
 
   public SubmissionController(
       SubmissionService submissionService,
       JwtSubmitterContextResolver jwtSubmitterContextResolver,
+      ApplicationTimeFormatter applicationTimeFormatter,
       ObjectMapper objectMapper) {
     this.submissionService = submissionService;
     this.jwtSubmitterContextResolver = jwtSubmitterContextResolver;
+    this.applicationTimeFormatter = applicationTimeFormatter;
     this.objectMapper = objectMapper;
   }
 
@@ -98,7 +102,7 @@ public class SubmissionController {
             request.toDomain(), jwtSubmitterContextResolver.resolve(jwt));
     return ResponseEntity.status(HttpStatus.CREATED)
         .contentType(APPLICATION_LD_JSON)
-        .body(toPrettyJson(SubmissionResponse.from(submission)));
+        .body(toPrettyJson(SubmissionResponse.from(submission, applicationTimeFormatter)));
   }
 
   String toPrettyJson(Object body) {
@@ -107,6 +111,10 @@ public class SubmissionController {
     } catch (JacksonException exception) {
       throw new IllegalStateException("Kunne ikke serialisere API-respons.", exception);
     }
+  }
+
+  ApplicationTimeFormatter applicationTimeFormatter() {
+    return applicationTimeFormatter;
   }
 
   public record GraduatingStudentsSubmissionRequest(
@@ -148,7 +156,8 @@ public class SubmissionController {
       LocalDate receivedDate,
       List<ValidatedStudentResponse> validationResults) {
 
-    static SubmissionResponse from(Submission submission) {
+    static SubmissionResponse from(
+        Submission submission, ApplicationTimeFormatter applicationTimeFormatter) {
       return new SubmissionResponse(
           Map.of("vigoskole", "https://novari.no/ontology/vigoskole#"),
           "vigoskole:Submission",
@@ -166,7 +175,7 @@ public class SubmissionController {
               : new SupplierResponse(
                   submission.supplier().orgNumber(), submission.supplier().name()),
           submission.submittedBy(),
-          submission.submittedAt().atZone(java.time.ZoneId.systemDefault()).toLocalDate(),
+          applicationTimeFormatter.toLocalDate(submission.submittedAt()),
           submission.validatedStudents().stream().map(ValidatedStudentResponse::from).toList());
     }
   }

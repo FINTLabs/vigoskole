@@ -31,7 +31,8 @@ public class ApiExceptionHandler {
                     "VALIDATION_ERROR",
                     exception.getMessage(),
                     LocalDateTime.now(),
-                    SubmissionController.SubmissionResponse.from(exception.submission()))));
+                    SubmissionController.SubmissionResponse.from(
+                        exception.submission(), submissionController.applicationTimeFormatter()))));
   }
 
   @ExceptionHandler({

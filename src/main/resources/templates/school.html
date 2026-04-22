@@ -51,7 +51,7 @@
             </thead>
             <tbody>
             <tr th:each="submission : ${submissions}">
-                <td th:text="${#temporals.format(submission.submittedAt().atZone(T(java.time.ZoneId).systemDefault()), 'dd/MM/yyyy HH:mm')}">16/04/2026 12:00</td>
+                <td th:text="${@applicationTimeFormatter.format(submission.submittedAt())}">16/04/2026 12:00</td>
                 <td th:text="${submission.type().displayName()}">Liste over avgangselever</td>
                 <td><span class="badge" th:classappend="${submission.status()}" th:text="${submission.status()}">ACCEPTED</span></td>
                 <td th:text="${submission.supplier() == null ? 'Direkte fra skole' : submission.supplier().name()}">Direkte fra skole</td>
