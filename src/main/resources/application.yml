@@ -15,9 +15,6 @@ spring:
   thymeleaf:
     cache: false
     encoding: UTF-8
-  jackson:
-    serialization:
-      indent-output: true
   security:
     oauth2:
       client:
@@ -40,13 +37,11 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: ${MASKINPORTEN_JWK_SET_URI:https://maskinporten.no/jwk}
-
-server:
   servlet:
     encoding:
-      charset: UTF-8
-      enabled: true
       force: true
+      enabled: true
+      charset: UTF-8
 
 management:
   endpoints:

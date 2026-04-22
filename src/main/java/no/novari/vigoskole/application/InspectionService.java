@@ -59,14 +59,12 @@ public class InspectionService {
     return schoolYearRepository.findBySchoolYear(schoolYear);
   }
 
-  public SchoolYearConfiguration createSchoolYear(
-      String schoolYear, SubmissionWindows submissionWindows) {
-    return schoolYearRepository.save(new SchoolYearConfiguration(schoolYear, submissionWindows));
+  public void createSchoolYear(String schoolYear, SubmissionWindows submissionWindows) {
+    schoolYearRepository.save(new SchoolYearConfiguration(schoolYear, submissionWindows));
   }
 
-  public SchoolYearConfiguration updateSchoolYear(
-      String schoolYear, SubmissionWindows submissionWindows) {
-    return schoolYearRepository.save(new SchoolYearConfiguration(schoolYear, submissionWindows));
+  public void updateSchoolYear(String schoolYear, SubmissionWindows submissionWindows) {
+    schoolYearRepository.save(new SchoolYearConfiguration(schoolYear, submissionWindows));
   }
 
   public void deleteSchoolYear(String schoolYear) {

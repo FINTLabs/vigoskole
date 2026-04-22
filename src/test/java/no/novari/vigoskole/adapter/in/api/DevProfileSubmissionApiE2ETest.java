@@ -42,7 +42,7 @@ class DevProfileSubmissionApiE2ETest {
   private SchoolYearRepository schoolYearRepository;
 
   @BeforeAll
-  static void setUp() throws IOException {
+  static void setUp() {
     ensureInfrastructure();
   }
 
@@ -95,7 +95,7 @@ class DevProfileSubmissionApiE2ETest {
   }
 
   private HttpResponse<String> exchange(String payload, String token) {
-    try {
+    try (HttpClient client = HttpClient.newHttpClient()) {
       HttpRequest request =
           HttpRequest.newBuilder()
               .uri(URI.create("http://localhost:" + port + "/api/submissions/graduating-students"))
@@ -103,7 +103,7 @@ class DevProfileSubmissionApiE2ETest {
               .header("Content-Type", "application/ld+json")
               .POST(HttpRequest.BodyPublishers.ofString(payload))
               .build();
-      return HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+      return client.send(request, HttpResponse.BodyHandlers.ofString());
     } catch (IOException | InterruptedException exception) {
       throw new IllegalStateException(exception);
     }

@@ -23,9 +23,9 @@ class VigoKodeverkSchoolDirectoryAdapterTest {
     assertThat(response.get("content"))
         .anySatisfy(
             entry -> {
-              assertThat(entry.path("orgNr").asText()).isEqualTo("974603268");
-              assertThat(entry.path("type").asText()).isEqualTo("G");
-              assertThat(entry.path("name").asText()).isEqualTo("Ås ungdomsskole");
+              assertThat(entry.path("orgNr").asString()).isEqualTo("974603268");
+              assertThat(entry.path("type").asString()).isEqualTo("G");
+              assertThat(entry.path("name").asString()).isEqualTo("Ås ungdomsskole");
             });
   }
 

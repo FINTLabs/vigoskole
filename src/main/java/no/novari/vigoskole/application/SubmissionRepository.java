@@ -7,7 +7,7 @@ import no.novari.vigoskole.domain.model.Submission;
 
 public interface SubmissionRepository {
 
-  Submission save(Submission submission);
+  void save(Submission submission);
 
   boolean existsAcceptedSubmission(String schoolYear, String schoolOrgNumber, Submission.Type type);
 

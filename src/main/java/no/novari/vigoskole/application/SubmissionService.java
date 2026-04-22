@@ -56,7 +56,7 @@ public class SubmissionService {
           "Innsending er kun tillatt innenfor konfigurert periode.");
     }
     SchoolInfo school = verifySchool(requiredSchoolOrgNumber(request));
-    List<StudentRecord> students = request == null ? List.of() : request.students();
+    List<StudentRecord> students = request.students();
     if (students.isEmpty()) {
       Submission submission = rejectedSubmission(List.of(), submitterContext, school, today);
       submissionRepository.save(submission);

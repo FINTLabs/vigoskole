@@ -149,10 +149,9 @@ class SubmissionServiceTest {
     private final List<Submission> submissions = new ArrayList<>();
 
     @Override
-    public Submission save(Submission submission) {
+    public void save(Submission submission) {
       submissions.removeIf(existing -> existing.id().equals(submission.id()));
       submissions.add(submission);
-      return submission;
     }
 
     @Override

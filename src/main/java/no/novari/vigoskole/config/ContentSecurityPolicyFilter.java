@@ -12,6 +12,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 final class ContentSecurityPolicyFilter extends OncePerRequestFilter {
 
   static final String CSP_NONCE_ATTRIBUTE = "cspNonce";
+  private static final String CONTENT_SECURITY_POLICY_HEADER = "Content-Security-Policy";
   private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
   @Override
@@ -20,7 +21,7 @@ final class ContentSecurityPolicyFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
     String nonce = generateNonce();
     request.setAttribute(CSP_NONCE_ATTRIBUTE, nonce);
-    response.setHeader("Content-Security-Policy", buildPolicy(nonce));
+    response.setHeader(CONTENT_SECURITY_POLICY_HEADER, buildPolicy(nonce));
     filterChain.doFilter(request, response);
   }
 

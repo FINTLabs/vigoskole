@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,7 +90,7 @@ class DevProfileWebLoginTest {
             get("/ui/school-years")
                 .session(
                     (org.springframework.mock.web.MockHttpSession)
-                        loginResult.getRequest().getSession(false)))
+                        Objects.requireNonNull(loginResult.getRequest().getSession(false))))
         .andExpect(status().isOk())
         .andExpect(content().string(containsString("dev")));
   }

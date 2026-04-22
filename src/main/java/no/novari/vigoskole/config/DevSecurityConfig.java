@@ -35,8 +35,7 @@ public class DevSecurityConfig {
   SecurityFilterChain devApiSecurityFilterChain(
       HttpSecurity http,
       @Value("${app.maskinporten.expected-scope:" + SecurityConfig.MASKINPORTEN_SCOPE + "}")
-          String expectedScope)
-      throws Exception {
+          String expectedScope) {
     http.securityMatcher("/api/**")
         .authorizeHttpRequests(
             authorize ->
@@ -61,7 +60,7 @@ public class DevSecurityConfig {
 
   @Bean
   @Order(2)
-  SecurityFilterChain devWebSecurityFilterChain(HttpSecurity http) throws Exception {
+  SecurityFilterChain devWebSecurityFilterChain(HttpSecurity http) {
     http.authorizeHttpRequests(
             authorize ->
                 authorize

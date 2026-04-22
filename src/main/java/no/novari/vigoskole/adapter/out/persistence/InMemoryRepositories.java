@@ -19,10 +19,9 @@ public class InMemoryRepositories implements SubmissionRepository, SchoolYearRep
   private final List<SchoolYearConfiguration> schoolYears = new ArrayList<>();
 
   @Override
-  public synchronized Submission save(Submission submission) {
+  public synchronized void save(Submission submission) {
     submissions.removeIf(existing -> existing.id().equals(submission.id()));
     submissions.add(submission);
-    return submission;
   }
 
   @Override

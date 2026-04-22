@@ -41,11 +41,7 @@ public class PersistenceConfig {
       try {
         Files.createDirectories(storageDirectory);
         Object root = embeddedStorageManager.root();
-        EclipseStoreState rootState;
-        if (root instanceof EclipseStoreState loadedState) {
-          rootState = loadedState;
-        } else {
-          rootState = state;
+        if (!(root instanceof EclipseStoreState)) {
           embeddedStorageManager.setRoot(state);
           embeddedStorageManager.storeRoot();
         }

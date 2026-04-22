@@ -2,6 +2,7 @@ package no.novari.vigoskole.config;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -9,6 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import no.novari.vigoskole.application.SubmitterContext;
 import no.novari.vigoskole.domain.model.SupplierInfo;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cache.Cache;
@@ -47,8 +50,8 @@ public class SecurityConfig {
   @Order(1)
   SecurityFilterChain apiSecurityFilterChain(
       HttpSecurity http,
-      @Value("${app.maskinporten.expected-scope:" + MASKINPORTEN_SCOPE + "}") String expectedScope)
-      throws Exception {
+      @Value("${app.maskinporten.expected-scope:" + MASKINPORTEN_SCOPE + "}")
+          String expectedScope) {
     http.securityMatcher("/api/**")
         .authorizeHttpRequests(
             authorize ->
@@ -73,7 +76,7 @@ public class SecurityConfig {
 
   @Bean
   @Order(2)
-  SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
+  SecurityFilterChain webSecurityFilterChain(HttpSecurity http) {
     http.authorizeHttpRequests(
             authorize ->
                 authorize
@@ -108,7 +111,7 @@ public class SecurityConfig {
           requireNonBlankOrCollection(jwt, "client_amr", errors);
           requireNonBlankOrCollection(jwt, "scope", errors);
           requireNonBlank(jwt, "jti", errors);
-          requireEquals(jwt, "token_type", "Bearer", errors);
+          requireTokenTypeBearer(jwt, errors);
           requireScope(jwt, expectedScope, errors);
           requireOrganizationClaim(jwt, "consumer", errors);
           rejectIfPresent(
@@ -256,11 +259,10 @@ public class SecurityConfig {
     errors.add(claimName, "Maskinporten-token mangler claimet '" + claimName + "'.");
   }
 
-  private static void requireEquals(
-      Jwt jwt, String claimName, String expectedValue, ValidationErrors errors) {
-    Object value = jwt.getClaims().get(claimName);
-    if (!(value instanceof String string) || !expectedValue.equals(string)) {
-      errors.add(claimName, "Maskinporten-token må ha '" + claimName + "=" + expectedValue + "'.");
+  private static void requireTokenTypeBearer(Jwt jwt, ValidationErrors errors) {
+    Object value = jwt.getClaims().get("token_type");
+    if (!(value instanceof String string) || !"Bearer".equals(string)) {
+      errors.add("token_type", "Maskinporten-token må ha 'token_type=Bearer'.");
     }
   }
 
@@ -283,17 +285,12 @@ public class SecurityConfig {
   private static void requireScope(Jwt jwt, String expectedScope, ValidationErrors errors) {
     Object scope = jwt.getClaims().get("scope");
     if (scope instanceof String scopeString) {
-      boolean matches =
-          java.util.Arrays.stream(scopeString.split("\\s+")).anyMatch(expectedScope::equals);
+      boolean matches = Arrays.asList(scopeString.split("\\s+")).contains(expectedScope);
       if (matches) {
         return;
       }
     }
-    if (scope instanceof Collection<?> scopes
-        && scopes.stream()
-            .filter(String.class::isInstance)
-            .map(String.class::cast)
-            .anyMatch(expectedScope::equals)) {
+    if (scope instanceof Collection<?> scopes && scopes.contains(expectedScope)) {
       return;
     }
     errors.add("scope", "Maskinporten-token mangler forventet scope '" + expectedScope + "'.");
@@ -326,6 +323,7 @@ public class SecurityConfig {
     }
   }
 
+  @NullMarked
   static final class ExpiringMapCache implements Cache {
 
     private final String name;
@@ -348,24 +346,29 @@ public class SecurityConfig {
     }
 
     @Override
-    public ValueWrapper get(Object key) {
+    public @Nullable ValueWrapper get(Object key) {
       CacheEntry entry = getValidEntry(key);
-      return entry == null ? null : () -> entry.value();
+      return entry == null ? null : entry::value;
     }
 
     @Override
-    public <T> T get(Object key, Class<T> type) {
+    public <T> @Nullable T get(Object key, @Nullable Class<T> type) {
       CacheEntry entry = getValidEntry(key);
       if (entry == null) {
         return null;
       }
       Object value = entry.value();
-      return type == null || type.isInstance(value) ? type.cast(value) : null;
+      if (type == null) {
+        @SuppressWarnings("unchecked")
+        T castValue = (T) value;
+        return castValue;
+      }
+      return type.isInstance(value) ? type.cast(value) : null;
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T get(Object key, Callable<T> valueLoader) {
+    public <T> @Nullable T get(Object key, Callable<T> valueLoader) {
       CacheEntry entry = getValidEntry(key);
       if (entry != null) {
         return (T) entry.value();
@@ -375,12 +378,13 @@ public class SecurityConfig {
         put(key, value);
         return value;
       } catch (Exception exception) {
-        throw new IllegalStateException("Kunne ikke laste verdi til cache.", exception);
+        throw new Cache.ValueRetrievalException(
+            "Kunne ikke laste verdi til cache.", valueLoader, exception);
       }
     }
 
     @Override
-    public void put(Object key, Object value) {
+    public void put(Object key, @Nullable Object value) {
       if (value == null) {
         evict(key);
         return;
@@ -398,7 +402,7 @@ public class SecurityConfig {
       store.clear();
     }
 
-    private CacheEntry getValidEntry(Object key) {
+    private @Nullable CacheEntry getValidEntry(Object key) {
       CacheEntry entry = store.get(key);
       if (entry == null) {
         return null;

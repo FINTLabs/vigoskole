@@ -24,12 +24,11 @@ public class EclipseStoreRepositories implements SubmissionRepository, SchoolYea
   }
 
   @Override
-  public synchronized Submission save(Submission submission) {
+  public synchronized void save(Submission submission) {
     EclipseStoreState currentState = currentState();
     currentState.submissions().removeIf(existing -> existing.id().equals(submission.id()));
     currentState.submissions().add(submission);
     storageManager.store(currentState.submissions());
-    return submission;
   }
 
   @Override

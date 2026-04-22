@@ -146,21 +146,21 @@ public class VigoKodeverkSchoolDirectoryAdapter implements SchoolDirectoryPort {
 
   private String findValue(JsonNode node, String key) {
     if (node.hasNonNull(key)) {
-      return node.get(key).asText();
+      return node.get(key).asString();
     }
     JsonNode values = node.get("values");
     if (values != null && values.isArray()) {
       for (JsonNode item : values) {
-        if (key.equals(item.path("key").asText())) {
-          return item.path("value").asText(null);
+        if (key.equals(item.path("key").asString())) {
+          return item.path("value").asString(null);
         }
       }
     }
     JsonNode fields = node.get("fields");
     if (fields != null && fields.isArray()) {
       for (JsonNode item : fields) {
-        if (key.equals(item.path("key").asText())) {
-          return item.path("value").asText(null);
+        if (key.equals(item.path("key").asString())) {
+          return item.path("value").asString(null);
         }
       }
     }
