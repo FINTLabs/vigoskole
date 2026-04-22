@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import no.novari.vigoskole.domain.model.GraduatingStudentsSubmission;
 import no.novari.vigoskole.domain.model.SchoolInfo;
 import no.novari.vigoskole.domain.model.SchoolYearConfiguration;
 import no.novari.vigoskole.domain.model.StudentRecord;
@@ -39,7 +40,7 @@ public class SubmissionService {
   }
 
   public Submission submitGraduatingStudents(
-      List<StudentRecord> students, SubmitterContext submitterContext) {
+      GraduatingStudentsSubmission request, SubmitterContext submitterContext) {
     LocalDate today = LocalDate.now(clock);
     String schoolYear = currentSchoolYear(today);
     SchoolYearConfiguration schoolYearConfiguration =
@@ -54,15 +55,14 @@ public class SubmissionService {
       throw new SubmissionWindowClosedException(
           "Innsending er kun tillatt innenfor konfigurert periode.");
     }
-    if (students == null || students.isEmpty()) {
-      Submission submission =
-          rejectedSubmission(
-              List.of(), submitterContext, verifySchool(submitterContext.orgNumber()), today);
+    SchoolInfo school = verifySchool(requiredSchoolOrgNumber(request));
+    List<StudentRecord> students = request == null ? List.of() : request.students();
+    if (students.isEmpty()) {
+      Submission submission = rejectedSubmission(List.of(), submitterContext, school, today);
       submissionRepository.save(submission);
       throw new SubmissionRejectedException(submission, "Innsendingen må inneholde minst én elev.");
     }
 
-    SchoolInfo school = verifySchool(submitterContext.orgNumber());
     if (submissionRepository.existsAcceptedSubmission(
         schoolYear, school.orgNumber(), Submission.Type.GRADUATING_STUDENTS)) {
       throw new DuplicateSubmissionException(
@@ -93,7 +93,7 @@ public class SubmissionService {
         Submission.Status.REJECTED,
         school,
         submitterContext.supplier(),
-        submitterContext.displayName(),
+        submitterContext.submitterName(),
         Instant.now(clock),
         validatedStudents);
   }
@@ -105,6 +105,15 @@ public class SubmissionService {
             () ->
                 new SchoolVerificationException(
                     "Organisasjonsnummeret tilhører ikke en ungdomsskole i VIGO Kodeverk."));
+  }
+
+  private String requiredSchoolOrgNumber(GraduatingStudentsSubmission request) {
+    if (request == null
+        || request.schoolOrgNumber() == null
+        || request.schoolOrgNumber().isBlank()) {
+      throw new IllegalArgumentException("Ungdomsskolens organisasjonsnummer er påkrevd.");
+    }
+    return request.schoolOrgNumber();
   }
 
   private Submission buildSubmission(
@@ -125,7 +134,7 @@ public class SubmissionService {
         status,
         school,
         submitterContext.supplier(),
-        submitterContext.displayName(),
+        submitterContext.submitterName(),
         Instant.now(clock),
         validatedStudents);
   }

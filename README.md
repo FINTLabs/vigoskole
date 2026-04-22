@@ -12,5 +12,8 @@ curl -i \
   --data @src/test/resources/curl/graduating-students-example-payload.json
 ```
 
+Payloaden må inneholde org.nr. til ungdomsskolen det sendes inn for. Maskinporten-tokenet identifiserer innsenderen, som
+kan være ungdomsskolen selv, kommunen eller en leverandør med delegasjon.
+
 ## OpenAPI dokumentasjon
 OpenAPI JSON er tilgjengelig på `/api-docs` og Swagger UI på `/swagger-ui`.

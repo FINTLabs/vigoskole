@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import no.novari.vigoskole.application.SubmissionService;
 import no.novari.vigoskole.config.SecurityConfig.JwtSubmitterContextResolver;
+import no.novari.vigoskole.domain.model.GraduatingStudentsSubmission;
 import no.novari.vigoskole.domain.model.StudentRecord;
 import no.novari.vigoskole.domain.model.Submission;
 import no.novari.vigoskole.domain.model.ValidatedStudent;
@@ -54,7 +55,9 @@ public class SubmissionController {
       summary = "Submit graduating students",
       description =
           "Submits the complete list of graduating students for the current school year. "
-              + "The request and response bodies are JSON-LD.",
+              + "The request and response bodies are JSON-LD. The payload identifies the lower "
+              + "secondary school the data applies to, while the Maskinporten token identifies "
+              + "the submitting organisation.",
       security = @SecurityRequirement(name = "maskinporten-jwt"),
       requestBody =
           @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -106,14 +109,17 @@ public class SubmissionController {
     }
   }
 
-  public record GraduatingStudentsSubmissionRequest(List<StudentRequest> students) {
+  public record GraduatingStudentsSubmissionRequest(
+      SchoolRequest school, List<StudentRequest> students) {
 
-    List<StudentRecord> toDomain() {
-      return students == null
-          ? List.of()
-          : students.stream().map(StudentRequest::toDomain).toList();
+    GraduatingStudentsSubmission toDomain() {
+      return new GraduatingStudentsSubmission(
+          school == null ? null : school.orgNumber(),
+          students == null ? List.of() : students.stream().map(StudentRequest::toDomain).toList());
     }
   }
+
+  public record SchoolRequest(String orgNumber) {}
 
   public record StudentRequest(String classCode, String personalIdentityNumber, NameRequest name) {
 

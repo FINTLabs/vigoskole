@@ -3,6 +3,7 @@ package no.novari.vigoskole;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import no.novari.vigoskole.domain.model.GraduatingStudentsSubmission;
 import no.novari.vigoskole.domain.model.SchoolInfo;
 import no.novari.vigoskole.domain.model.SchoolYearConfiguration;
 import no.novari.vigoskole.domain.model.StudentRecord;
@@ -77,10 +78,12 @@ public final class TestData {
     return """
                 {
                   "@context": {
-                    "fint": "https://novari.no/ontology/fint.ttl#",
-                    "vigo": "https://novari.no/ontology/vigo-skole#"
+                    "vigoskole": "https://novari.no/ontology/vigoskole#"
                   },
-                  "@type": "vigo:graduatingStudentSubmission",
+                  "@type": "vigoskole:GraduatingStudentsSubmissionRequest",
+                  "school": {
+                    "orgNumber": "974603268"
+                  },
                   "students": [
                     {
                       "classCode": "10A",
@@ -99,10 +102,12 @@ public final class TestData {
     return """
                 {
                   "@context": {
-                    "fint": "https://novari.no/ontology/fint.ttl#",
-                    "vigo": "https://novari.no/ontology/vigo-skole#"
+                    "vigoskole": "https://novari.no/ontology/vigoskole#"
                   },
-                  "@type": "vigo:graduatingStudentSubmission",
+                  "@type": "vigoskole:GraduatingStudentsSubmissionRequest",
+                  "school": {
+                    "orgNumber": "974603268"
+                  },
                   "students": [
                     {
                       "classCode": "10A",
@@ -121,10 +126,12 @@ public final class TestData {
     return """
                 {
                   "@context": {
-                    "fint": "https://novari.no/ontology/fint.ttl#",
-                    "vigo": "https://novari.no/ontology/vigo-skole#"
+                    "vigoskole": "https://novari.no/ontology/vigoskole#"
                   },
-                  "@type": "vigo:graduatingStudentSubmission",
+                  "@type": "vigoskole:GraduatingStudentsSubmissionRequest",
+                  "school": {
+                    "orgNumber": "974603268"
+                  },
                   "students": [
                     {
                       "classCode": "",
@@ -134,6 +141,36 @@ public final class TestData {
                   ]
                 }
                 """;
+  }
+
+  public static String missingSchoolOrgNumberPayload() {
+    return """
+                {
+                  "@context": {
+                    "vigoskole": "https://novari.no/ontology/vigoskole#"
+                  },
+                  "@type": "vigoskole:GraduatingStudentsSubmissionRequest",
+                  "school": {},
+                  "students": [
+                    {
+                      "classCode": "10A",
+                      "personalIdentityNumber": "15049100008",
+                      "name": {
+                        "firstName": "Ola",
+                        "lastName": "Nordmann"
+                      }
+                    }
+                  ]
+                }
+                """;
+  }
+
+  public static GraduatingStudentsSubmission validGraduatingStudentsSubmission() {
+    return new GraduatingStudentsSubmission(SCHOOL_ORG_NUMBER, List.of(validStudent()));
+  }
+
+  public static GraduatingStudentsSubmission syntheticGraduatingStudentsSubmission() {
+    return new GraduatingStudentsSubmission(SCHOOL_ORG_NUMBER, List.of(syntheticStudent()));
   }
 
   public static String kodeverkResponse() {

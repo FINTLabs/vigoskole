@@ -182,15 +182,17 @@ public class SecurityConfig {
       if (jwt == null) {
         throw new IllegalArgumentException("Mangler Maskinporten-token.");
       }
-      String orgNumber =
+      String submitterOrgNumber =
           firstNonBlank(
               consumerOrgNumber(jwt),
               claim(jwt, "org_number", "orgnr", "consumer_org_number", "organization_number"));
-      if (orgNumber == null || orgNumber.isBlank()) {
-        throw new IllegalArgumentException("Maskinporten-token mangler organisasjonsnummer.");
+      if (submitterOrgNumber == null || submitterOrgNumber.isBlank()) {
+        throw new IllegalArgumentException(
+            "Maskinporten-token mangler innsenderens organisasjonsnummer.");
       }
-      String displayName =
-          firstNonBlank(claim(jwt, "consumer_name", "organization_name", "client_name"), orgNumber);
+      String submitterName =
+          firstNonBlank(
+              claim(jwt, "consumer_name", "organization_name", "client_name"), submitterOrgNumber);
       String supplierOrg =
           firstNonBlank(
               organizationClaimValue(jwt, "supplier"),
@@ -200,7 +202,7 @@ public class SecurityConfig {
           supplierOrg == null && supplierName == null
               ? null
               : new SupplierInfo(supplierOrg, supplierName);
-      return new SubmitterContext(orgNumber, displayName, supplier);
+      return new SubmitterContext(submitterOrgNumber, submitterName, supplier);
     }
 
     private String consumerOrgNumber(Jwt jwt) {

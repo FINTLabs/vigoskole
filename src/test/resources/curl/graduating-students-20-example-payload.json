@@ -2,7 +2,10 @@
   "@context": {
     "vigoskole": "https://novari.no/ontology/vigoskole#"
   },
-  "@type": "vigoskole:GraduatingStudentsSubmission",
+  "@type": "vigoskole:GraduatingStudentsSubmissionRequest",
+  "school": {
+    "orgNumber": "974603268"
+  },
   "students": [
     {
       "classCode": "10A",

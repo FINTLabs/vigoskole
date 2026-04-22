@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import no.novari.vigoskole.TestData;
+import no.novari.vigoskole.domain.model.GraduatingStudentsSubmission;
 import no.novari.vigoskole.domain.model.SchoolInfo;
 import no.novari.vigoskole.domain.model.SchoolYearConfiguration;
 import no.novari.vigoskole.domain.model.StudentRecord;
@@ -43,12 +44,13 @@ class SubmissionServiceTest {
   void shouldAcceptSubmissionWithWarnings() {
     Submission submission =
         submissionService.submitGraduatingStudents(
-            List.of(TestData.syntheticStudent()),
-            new SubmitterContext(TestData.SCHOOL_ORG_NUMBER, "Test ungdomsskole", null));
+            TestData.syntheticGraduatingStudentsSubmission(),
+            new SubmitterContext("999999999", "Ås kommune", null));
 
     assertThat(submission.status()).isEqualTo(Submission.Status.ACCEPTED_WITH_WARNINGS);
     assertThat(submission.validatedStudents().getFirst().messages()).hasSize(1);
     assertThat(submissionRepository.findAll()).hasSize(1);
+    assertThat(submission.submittedBy()).isEqualTo("Ås kommune");
   }
 
   @Test
@@ -59,8 +61,9 @@ class SubmissionServiceTest {
     assertThatThrownBy(
             () ->
                 submissionService.submitGraduatingStudents(
-                    List.of(invalidStudent),
-                    new SubmitterContext(TestData.SCHOOL_ORG_NUMBER, "Test ungdomsskole", null)))
+                    new GraduatingStudentsSubmission(
+                        TestData.SCHOOL_ORG_NUMBER, List.of(invalidStudent)),
+                    new SubmitterContext("999999999", "Ås kommune", null)))
         .isInstanceOf(SubmissionRejectedException.class);
 
     assertThat(submissionRepository.findAll()).hasSize(1);
@@ -75,8 +78,8 @@ class SubmissionServiceTest {
     assertThatThrownBy(
             () ->
                 submissionService.submitGraduatingStudents(
-                    List.of(TestData.validStudent()),
-                    new SubmitterContext(TestData.SCHOOL_ORG_NUMBER, "Test ungdomsskole", null)))
+                    TestData.validGraduatingStudentsSubmission(),
+                    new SubmitterContext("999999999", "Ås kommune", null)))
         .isInstanceOf(DuplicateSubmissionException.class);
   }
 
@@ -94,8 +97,8 @@ class SubmissionServiceTest {
     assertThatThrownBy(
             () ->
                 submissionService.submitGraduatingStudents(
-                    List.of(TestData.validStudent()),
-                    new SubmitterContext(TestData.SCHOOL_ORG_NUMBER, "Test ungdomsskole", null)))
+                    TestData.validGraduatingStudentsSubmission(),
+                    new SubmitterContext("999999999", "Ås kommune", null)))
         .isInstanceOf(SubmissionWindowClosedException.class);
   }
 
@@ -106,9 +109,20 @@ class SubmissionServiceTest {
     assertThatThrownBy(
             () ->
                 submissionService.submitGraduatingStudents(
-                    List.of(TestData.validStudent()),
-                    new SubmitterContext(TestData.SCHOOL_ORG_NUMBER, "Test ungdomsskole", null)))
+                    TestData.validGraduatingStudentsSubmission(),
+                    new SubmitterContext("999999999", "Ås kommune", null)))
         .isInstanceOf(SchoolYearNotFoundException.class);
+  }
+
+  @Test
+  void shouldRejectWhenSchoolOrgNumberIsMissingFromPayload() {
+    assertThatThrownBy(
+            () ->
+                submissionService.submitGraduatingStudents(
+                    new GraduatingStudentsSubmission(" ", List.of(TestData.validStudent())),
+                    new SubmitterContext("999999999", "Ås kommune", null)))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("organisasjonsnummer");
   }
 
   private SchoolDirectoryPort schoolDirectoryPort() {

@@ -212,7 +212,7 @@ A03	KURSKODE
   I dette eksemplet er 974603268 organisasjonsnummeret. Det må sjekkes at resultatet inneholder en entry i
   "content" propertyen som har key "orgNr" og value "974603268", samt at "type" er lik "G". Ved match, ta
   vare på "name" (ungdsomsskolens navn), "municipalityNr" (kommunenummer), "countyNr" (fylkesnummeret) og
-  "number" (skolenummeret). Disse assosieres med opplastningen og brukes[fint-ontology.ttl](../../../Documents/Novari/fint-ontology.ttl) ved fremvisning av opplastning
+  "number" (skolenummeret). Disse assosieres med opplastningen og brukes ved fremvisning av opplastning
   til innloggede brukere i Vigo Skole.
 - HTTP respons til klienten som laster opp:
   - HTTP 201 kun hvis innsendingen er godkjent uten feil. Advarsler er tillatt.
@@ -226,7 +226,6 @@ A03	KURSKODE
   Eksempel gutt fra Troms: 55049199119 (født 150491 og hjemmehørende i fylke 19)
 - JSON-LD formaterte meldinger:
   - Anta at ontologien har adresse https://novari.no/ontology/fint.ttl
-  - En foreløpig testversjon av ontologien er tilgjengelig i filen [fint-ontology.ttl](../../../Documents/Novari/fint-ontology.ttl)
   - Person-data for En elev er en fint:felles/person.
   - Navn på elev er property fint:felles/person/navn med type fint:felles/komplekse-datatyper/personnavn
   - Finn på nye properties for klassekode og andre manglende properties og typer i ontologien.

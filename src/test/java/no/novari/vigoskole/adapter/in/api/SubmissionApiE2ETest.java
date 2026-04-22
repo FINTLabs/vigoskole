@@ -87,13 +87,14 @@ class SubmissionApiE2ETest {
     enqueueResponse(TestData.kodeverkResponse());
 
     HttpResponse<String> firstResponse =
-        exchange(TestData.warningSubmissionPayload(), "school-token");
+        exchange(TestData.warningSubmissionPayload(), "municipality-token");
     HttpResponse<String> secondResponse =
-        exchange(TestData.validSubmissionPayload(), "school-token");
+        exchange(TestData.validSubmissionPayload(), "municipality-token");
 
     assertThat(firstResponse.statusCode()).isEqualTo(201);
     assertThat(firstResponse.body()).contains("ACCEPTED_WITH_WARNINGS");
     assertThat(firstResponse.body()).contains("Ås ungdomsskole");
+    assertThat(firstResponse.body()).contains("Ås kommune");
     assertThat(firstResponse.body()).contains("991825827");
     assertThat(firstResponse.body()).contains("\n  \"submissionId\"");
     assertThat(lastKodeverkRequestMethod).isEqualTo("POST");
@@ -107,7 +108,8 @@ class SubmissionApiE2ETest {
   void shouldReturnValidationErrorsForRejectedSubmission() {
     enqueueResponse(TestData.kodeverkResponse());
 
-    HttpResponse<String> response = exchange(TestData.invalidSubmissionPayload(), "school-token");
+    HttpResponse<String> response =
+        exchange(TestData.invalidSubmissionPayload(), "municipality-token");
 
     assertThat(response.statusCode()).isEqualTo(400);
     assertThat(response.body()).contains("VALIDATION_ERROR");
@@ -119,11 +121,23 @@ class SubmissionApiE2ETest {
   void shouldRejectSubmissionWhenConsumerOrgNumberIsNotVerifiedAsLowerSecondarySchool() {
     enqueueResponse(TestData.kodeverkResponseWithoutMatchingSchool());
 
-    HttpResponse<String> response = exchange(TestData.validSubmissionPayload(), "school-token");
+    HttpResponse<String> response =
+        exchange(TestData.validSubmissionPayload(), "municipality-token");
 
     assertThat(response.statusCode()).isEqualTo(403);
     assertThat(response.body()).contains("tilhører ikke en ungdomsskole");
     assertThat(lastKodeverkRequestBody).contains("974603268");
+  }
+
+  @Test
+  void shouldRejectSubmissionWhenSchoolOrgNumberIsMissingFromPayload() {
+    HttpResponse<String> response =
+        exchange(TestData.missingSchoolOrgNumberPayload(), "municipality-token");
+
+    assertThat(response.statusCode()).isEqualTo(400);
+    assertThat(response.body()).contains("BAD_REQUEST");
+    assertThat(response.body()).contains("Ungdomsskolens organisasjonsnummer er påkrevd");
+    assertThat(lastKodeverkRequestBody).isNull();
   }
 
   @Test
@@ -237,6 +251,7 @@ class SubmissionApiE2ETest {
       Map<String, Object> claims =
           switch (token) {
             case "missing-consumer-token" -> baseClaimsWithoutConsumer();
+            case "municipality-token" -> municipalityClaims();
             case "skyporten-token" -> claimsWithSub();
             case "enduser-token" -> claimsWithPid();
             case "wrong-scope-token" -> claimsWithWrongScope();
@@ -253,6 +268,14 @@ class SubmissionApiE2ETest {
     private Map<String, Object> baseClaims() {
       Map<String, Object> claims = baseClaimsWithoutConsumer();
       claims.put("consumer", Map.of("authority", "iso6523-actorid-upis", "ID", "0192:974603268"));
+      claims.put("consumer_name", "Ås ungdomsskole");
+      return claims;
+    }
+
+    private Map<String, Object> municipalityClaims() {
+      Map<String, Object> claims = baseClaimsWithoutConsumer();
+      claims.put("consumer", Map.of("authority", "iso6523-actorid-upis", "ID", "0192:912345678"));
+      claims.put("consumer_name", "Ås kommune");
       return claims;
     }
 

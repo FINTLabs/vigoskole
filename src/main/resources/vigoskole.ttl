@@ -15,11 +15,11 @@
     dcterms:description "Ontology requests and responses exposed by the Vigo Skole service."@en,
         "Ontologi for forespørsler og responser som eksponeres av tjenesten Vigo Skole."@nb ;
     dcterms:creator "Novari" ;
-    dcterms:issued "2026-04-20"^^xsd:date ;
+    dcterms:issued "2026-04-22"^^xsd:date ;
     dcterms:source <https://www.digdir.no/informasjonsforvaltning/person-og-enhet-felles-informasjonsmodell/2018>,
         <https://esco.ec.europa.eu/en/about-esco/escopedia/escopedia/european-learning-model>,
         <https://europass.europa.eu/en/node/2675> ;
-    owl:versionInfo "1.0.0" ;
+    owl:versionInfo "1.1.0" ;
     rdfs:comment "The ontology draws structural inspiration from Digdir's Actor/Person/Entity/Identifier model and from the European Learning Model's use of linked open data, explicit classes, relations, provenance and controlled concept schemes."@en,
         "Ontologien henter strukturell inspirasjon fra Digdir-modellenes Aktør/Person/Enhet/Identifikator og fra European Learning Model sin bruk av lenkede data, eksplisitte klasser, relasjoner, provenance og kontrollerte begrepsskjema."@nb .
 
@@ -48,14 +48,20 @@ vigoskole:GraduatingStudentsSubmissionRequest
         vigoskole:RequestDocument,
         [
             a owl:Restriction ;
+            owl:onProperty vigoskole:targetsSchool ;
+            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+            owl:onClass vigoskole:School
+        ],
+        [
+            a owl:Restriction ;
             owl:onProperty vigoskole:hasStudent ;
             owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
             owl:onClass vigoskole:Student
         ] ;
     rdfs:label "graduating students submission request"@en,
         "forespørsel om innsending av avgangselever"@nb ;
-    rdfs:comment "Request document for submission of the complete list of graduating students for one lower secondary school in the current school year."@en,
-        "Forespørselsdokument for innsending av komplett liste over avgangselever for én ungdomsskole i inneværende skoleår."@nb .
+    rdfs:comment "Request document for submission of the complete list of graduating students for one lower secondary school in the current school year. The school is identified in the payload so the submitting organisation can be the school itself, a municipality or a delegated supplier."@en,
+        "Forespørselsdokument for innsending av komplett liste over avgangselever for én ungdomsskole i inneværende skoleår. Skolen identifiseres i payloaden slik at innsenderen kan være skolen selv, kommunen eller en delegert leverandør."@nb .
 
 vigoskole:Submission
     a owl:Class ;
@@ -140,6 +146,14 @@ vigoskole:Supplier
     rdfs:comment "Organisation submitting on behalf of a school when supplier information is present in the Maskinporten token."@en,
         "Organisasjon som sender inn på vegne av en skole når leverandørinformasjon finnes i Maskinporten-tokenet."@nb .
 
+vigoskole:Submitter
+    a owl:Class ;
+    rdfs:subClassOf vigoskole:Organisation ;
+    rdfs:label "submitter"@en,
+        "innsender"@nb ;
+    rdfs:comment "Organisation authenticated through Maskinporten and responsible for the submission, for example a lower secondary school or a municipality."@en,
+        "Organisasjon autentisert gjennom Maskinporten og ansvarlig for innsendingen, for eksempel en ungdomsskole eller en kommune."@nb .
+
 vigoskole:Student
     a owl:Class ;
     rdfs:subClassOf vigoskole:Person ;
@@ -183,12 +197,26 @@ vigoskole:hasStudent
     rdfs:label "has student"@en,
         "har elev"@nb .
 
+vigoskole:targetsSchool
+    a owl:ObjectProperty ;
+    rdfs:domain vigoskole:GraduatingStudentsSubmissionRequest ;
+    rdfs:range vigoskole:School ;
+    rdfs:label "targets school"@en,
+        "gjelder skole"@nb .
+
 vigoskole:hasSchool
     a owl:ObjectProperty ;
     rdfs:domain vigoskole:Submission ;
     rdfs:range vigoskole:School ;
     rdfs:label "has school"@en,
         "har skole"@nb .
+
+vigoskole:hasSubmitter
+    a owl:ObjectProperty ;
+    rdfs:domain vigoskole:Submission ;
+    rdfs:range vigoskole:Submitter ;
+    rdfs:label "has submitter"@en,
+        "har innsender"@nb .
 
 vigoskole:hasSupplier
     a owl:ObjectProperty ;
@@ -266,7 +294,9 @@ vigoskole:submittedBy
     rdfs:domain vigoskole:Submission ;
     rdfs:range xsd:string ;
     rdfs:label "submitted by"@en,
-        "innsendt av"@nb .
+        "innsendt av"@nb ;
+    rdfs:comment "Display name of the organisation authenticated through Maskinporten and recorded as the submitter of the payload."@en,
+        "Visningsnavn på organisasjonen som er autentisert gjennom Maskinporten og registrert som innsender av payloaden."@nb .
 
 vigoskole:receivedDate
     a owl:DatatypeProperty ;

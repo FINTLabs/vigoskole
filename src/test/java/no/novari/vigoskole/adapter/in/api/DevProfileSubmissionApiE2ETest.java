@@ -34,6 +34,7 @@ class DevProfileSubmissionApiE2ETest {
   private static final Queue<String> queuedResponses = new ArrayDeque<>();
   private static volatile String lastKodeverkRequestMethod;
   private static volatile String lastKodeverkRequestPath;
+  private static volatile String lastKodeverkRequestBody;
 
   @LocalServerPort private int port;
 
@@ -50,6 +51,7 @@ class DevProfileSubmissionApiE2ETest {
     queuedResponses.clear();
     lastKodeverkRequestMethod = null;
     lastKodeverkRequestPath = null;
+    lastKodeverkRequestBody = null;
     schoolYearRepository.save(TestData.schoolYearConfiguration());
   }
 
@@ -67,6 +69,8 @@ class DevProfileSubmissionApiE2ETest {
         "app.vigo-kodeverk.base-url",
         () -> "http://localhost:" + kodeverkServer.getAddress().getPort());
     registry.add("app.storage-directory", DevProfileSubmissionApiE2ETest::newStorageDirectory);
+    registry.add("app.maskinporten.test-token.consumer-org-number", () -> "912345678");
+    registry.add("app.maskinporten.test-token.consumer-name", () -> "Ås kommune");
   }
 
   @Test
@@ -77,8 +81,10 @@ class DevProfileSubmissionApiE2ETest {
 
     assertThat(response.statusCode()).isEqualTo(201);
     assertThat(response.body()).contains("Ås ungdomsskole");
+    assertThat(response.body()).contains("Ås kommune");
     assertThat(lastKodeverkRequestMethod).isEqualTo("POST");
     assertThat(lastKodeverkRequestPath).isEqualTo("/api/schools?page=0&size=10");
+    assertThat(lastKodeverkRequestBody).contains("974603268");
   }
 
   @Test
@@ -111,6 +117,8 @@ class DevProfileSubmissionApiE2ETest {
             "/api/schools",
             exchange -> {
               byte[] ignoredBody = exchange.getRequestBody().readAllBytes();
+              lastKodeverkRequestBody =
+                  new String(ignoredBody, java.nio.charset.StandardCharsets.UTF_8);
               lastKodeverkRequestMethod = exchange.getRequestMethod();
               lastKodeverkRequestPath = exchange.getRequestURI().toString();
               String response = queuedResponses.poll();
