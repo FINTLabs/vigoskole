@@ -37,7 +37,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.eclipse.store:storage-embedded:4.0.1")
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-api:2.8.11")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-api:3.0.3")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
