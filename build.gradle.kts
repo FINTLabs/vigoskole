@@ -1,6 +1,6 @@
 plugins {
     java
-    id("org.springframework.boot") version "4.0.5"
+    id("org.springframework.boot") version "4.0.6"
     id("com.diffplug.spotless") version "8.4.0"
 }
 
@@ -26,8 +26,8 @@ repositories {
 val eclipseStoreJvmArgs = listOf("--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED")
 
 dependencies {
-    implementation(platform("org.springframework.boot:spring-boot-dependencies:4.0.5"))
-    testImplementation(platform("org.springframework.boot:spring-boot-dependencies:4.0.5"))
+    implementation(platform("org.springframework.boot:spring-boot-dependencies:4.0.6"))
+    testImplementation(platform("org.springframework.boot:spring-boot-dependencies:4.0.6"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
