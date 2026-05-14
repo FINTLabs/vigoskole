@@ -1,7 +1,7 @@
 plugins {
     java
     id("org.springframework.boot") version "4.0.5"
-    id("com.diffplug.spotless") version "8.4.0"
+    id("com.diffplug.spotless") version "8.5.0"
 }
 
 val spotlessRatchetRef =
